@@ -637,7 +637,8 @@ void Run_Client()
     send_to_server = My_Server_ID;
   else
     send_to_server = 1;
-  if(time_stamp<needed_count){
+  if(time_stamp<needed_count)
+  {
   	Send_Update(0, NULL);
   }
 }
