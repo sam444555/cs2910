@@ -19,7 +19,10 @@ RUN git clone https://github.com/sam444555/cs2910.git
 
 # Configure and compile spines
 WORKDIR /root/cs2910/prime/spines
-RUN chmod +x configure
+# Make the scripts used executable
+RUN chmod +x configure && \\
+    chmod -R +x stdutil/buildtools && \\
+    chmod -R +x libspread-util/buildtools
 RUN ./configure
 RUN make -C daemon parser
 RUN make
