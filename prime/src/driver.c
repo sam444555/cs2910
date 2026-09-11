@@ -145,6 +145,8 @@ double Min_PO_Time, Max_PO_Time;
 /* FILE *fp; */
 struct sockaddr_un Conn;
 
+sw
+
 void clean_exit(int signum)
 {
   Alarm(PRINT, "Received signal %d\n", signum);
@@ -224,6 +226,7 @@ void Usage(int argc, char **argv)
   My_Server_Alive =1; 
   while(--argc > 0) {
     argv++;
+  
     
     /* [-l A.B.C.D] */
     if((argc > 1) && (!strncmp(*argv, "-l", 2))) {
