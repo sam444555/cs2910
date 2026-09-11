@@ -69,7 +69,12 @@
  * having multiple requests outstanding at one time.  After sending
  * the specified number of requests, the client does not send a new
  * one until it receives a response to one of the previous ones. */
-#define NUM_CLIENTS_TO_EMULATE 1
+// #define NUM_CLIENTS_TO_EMULATE 1
+/*
+    replaced with int32u num_clients_to_emulate as to eliminate the need to recompile 
+    everytime the number of emulated clients adjusts for throughput testing (now passed as an argument via the -n flag)
+
+*/
 
 /* Adjust this to configure how often a client prints. */
 /*#define PRINT_INTERVAL NUM_CLIENTS_TO_EMULATE*/
@@ -124,6 +129,7 @@ static sys_scatter srv_recv_scat;
 /* static sys_scatter ses_recv_scat; */
 
 int32u num_outstanding_updates;
+int32u num_clients_to_emulate = 1;
 int32u send_to_server;
 int32u last_executed = 0;
 int32u executed[MAX_ACTIONS];
@@ -253,6 +259,14 @@ void Usage(int argc, char **argv)
       needed_count = tmp;
       argc--; argv++;
     } 
+  /* [-n number of clients to emulate]*/
+    else if((argc > 1)&&(!strncmp(*argv, "-n", 2))) 
+    {
+      sscanf(argv[1], "%d", &tmp);
+      num_clients_to_emulate = tmp;
+      argc--; argv++;
+    } 
+
    else {
       Print_Usage();
     }
@@ -649,7 +663,7 @@ void Send_Update(int dummy, void *dummyp)
   update_message *update_specific;
   int ret;
 
-  while(num_outstanding_updates < NUM_CLIENTS_TO_EMULATE) {
+  while(num_outstanding_updates < num_clients_to_emulate) {
 
     /* Build a new update */
     update             = UTIL_New_Signed_Message();
