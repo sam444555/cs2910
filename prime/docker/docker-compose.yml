@@ -1,3 +1,6 @@
+# All containers use the docker network prime-net. 
+# Each container is assigned a distinct id 
+# and its IP address is derived from base ip (172.20.0.0)+ID+1
 networks:
   prime-net:
     driver: bridge
@@ -7,7 +10,14 @@ networks:
           gateway: 172.20.0.1
     name: prime-net
 
+# This topology consists of 6 replicas, satisfying NUM_SERVERS=3f+2k+1 (prime/src/def.h)
+# where f = 1 for # of tolerated Byzantine replicas and k=1 for # of tolerated benign replicas
+
+# TODO: add more serves to evaluate local scalability
 services:
+
+  # Only instance of driver.c is run from replica prime1. Once a baseline throughput is established,
+  # running multiple instances of this program would be an interesting follow up stress test evaluation. 
   prime1:
     image: replica-img
     container_name: prime1
