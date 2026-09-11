@@ -1314,6 +1314,7 @@ on 51df8a170eb5
 
 config.status:616: creating src/Makefile
 config.status:616: creating include/stdutil/private/stdarch_autoconf.h
+config.status:877: include/stdutil/private/stdarch_autoconf.h is unchanged
 
 ## ---------------- ##
 ## Cache variables. ##

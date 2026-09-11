@@ -4,8 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "/root/cs2910/prime/src",
                 "/root/cs2910/prime/libspread-util/include",
-                "/root/cs2910/prime/spines/libspread-util/include",
+                "/root/cs2910/prime/libspread-util/src",
                 "/root/cs2910/prime/spines/libspines"
             ],
             "defines": [],

@@ -129,15 +129,21 @@ static sys_scatter srv_recv_scat;
 /* static sys_scatter ses_recv_scat; */
 
 int32u num_outstanding_updates;
+
+//used for throughput measurement, passed as a command line argument
 int32u num_clients_to_emulate = 1;
+
+
 int32u send_to_server;
 int32u last_executed = 0;
 int32u executed[MAX_ACTIONS];
 int sd[MAX_NUM_SERVER_SLOTS];
 util_stopwatch update_sw[MAX_ACTIONS];
 
-util_stopwatch sw;
+util_stopwatch sw;  // unused?
 util_stopwatch latency_sw;
+util_stopwatch throughput_sw;
+
 signed_message *pending_update;
 double Latencies[MAX_ACTIONS];
 int32u Histogram[NUM_BUCKETS];
@@ -145,7 +151,6 @@ double Min_PO_Time, Max_PO_Time;
 /* FILE *fp; */
 struct sockaddr_un Conn;
 
-sw
 
 void clean_exit(int signum)
 {
@@ -293,6 +298,7 @@ void Usage(int argc, char **argv)
   srand(My_Client_ID);
 }
 
+// TODO: update for num emulate clients change 
 void Print_Usage()
 {
   Alarm(PRINT, "Usage: ./client\n"
@@ -628,6 +634,36 @@ void Process_Message( signed_message *mess, int32u num_bytes )
                     time, response_specific->PO_time);
   
   num_outstanding_updates--;
+  
+  /*
+      Throughput measurement exit condition: No outstanding updates and all 
+      client requested updates have been delivered
+
+      TODO: make this a function for readability
+  */
+  if(num_outstanding_updates==0 && time_stamp==needed_count)
+  {
+    //stop timer
+    UTIL_Stopwatch_Stop(&throughput_sw);
+    //time elapsed [since first update sent to the final one]
+    double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
+    //calc throughput = completed requests/elapsed time 
+    // where completed requests = needed_count (input num of requests)
+    double throughput = (double)needed_count/time_elapsed;
+    //print results:
+    /*
+        Throughput in updates/sec
+        Total number of Emulated Clients
+        Total updates sent
+    */
+    printf("\nThroughput: %.2f updates/sec\n",throughput);
+    printf("Number of Emulated Clients: %u\n",num_clients_to_emulate);
+    printf("Total Updates Sent: %u\n",needed_count);
+    //exit (remove this to get latency information from CLIENT_Cleanup())
+    exit(0);
+  }
+
+
 
   //sleep(1);
   //usleep(100000);
@@ -654,10 +690,16 @@ void Run_Client()
     send_to_server = My_Server_ID;
   else
     send_to_server = 1;
+  /*
+    Time begins for throughput testing
+  */
+  UTIL_Stopwatch_Start(&throughput_sw);
+
   if(time_stamp<needed_count)
   {
   	Send_Update(0, NULL);
   }
+
 }
 
 void Send_Update(int dummy, void *dummyp)
