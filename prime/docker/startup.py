@@ -12,7 +12,7 @@ spines =subprocess.Popen(f"./spines -I {ip}", cwd='/root/cs2910/prime/spines/dae
 time.sleep(5)
 
 # start prime: ./prime -i <server id> -g <global id>
-subprocess.Popen(f"./prime -i {id} -g {id}", cwd='/root/cs2910/prime/bin')
+subprocess.Popen(f"./prime -i {id} -g {id}", cwd='/root/cs2910/prime/bin',shell=True)
 
 # wait for spines to terminate then terminate 
 spines.communicate()
