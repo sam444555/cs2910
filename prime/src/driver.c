@@ -752,10 +752,28 @@ void Send_Update(int dummy, void *dummyp)
     //IPC = inter-process communication
     if (USE_IPC_CLIENT) 
     {
-        puts("entering sendto");
-        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message), 0,
+
+        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
                     (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
-        puts("exiting sendto");
+        
+        /*
+            Bug: When num_clients_to_emulate>=25, the driver successfully sends a few messages but
+            eventually stalls indefinitely. Current debugging leads me to believe that the 
+            prime process's socket receive buffer becomes full and the kernel blocks the 
+            driver process until buffer space becomes available. For some reason the driver 
+            process never wakes up, resulting in a deadlock. 
+        
+            The current fix (untested) is to make sendto nonblocking and if this issue arises 
+            return from the function and try again.
+        */                    
+        if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
+        {
+          time_stamp--;
+          dec_ref_cnt(update);
+          return;
+        }
+
+
     }
 
     else 
@@ -773,18 +791,24 @@ void Send_Update(int dummy, void *dummyp)
     
     dec_ref_cnt(update);
 
+    /*
+        If no specific server is selected (which gets passed into the command line)
+        this code executes and sends the update to a random server. 
+    */
+
     /* If we're rotating across all servers, send the next one to the 
      * next server modulo the total number of servers. */
-    if(My_Server_ID == 0) {
+//     if(My_Server_ID == 0) 
+//     {
 
-#if 0
-      send_to_server++;
-      send_to_server = send_to_server % (NUM_SERVERS);
-#endif
-      send_to_server = rand() % MAX_NUM_SERVERS;
-      if(send_to_server == 0)
-        send_to_server = MAX_NUM_SERVERS;
-    }
+// #if 0
+//       send_to_server++;
+//       send_to_server = send_to_server % (NUM_SERVERS);
+// #endif
+//       send_to_server = rand() % MAX_NUM_SERVERS;
+//       if(send_to_server == 0)
+//         send_to_server = MAX_NUM_SERVERS;
+//     }
 
     num_outstanding_updates++;
   }
