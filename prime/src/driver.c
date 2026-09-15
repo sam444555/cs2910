@@ -748,13 +748,18 @@ void Send_Update(int dummy, void *dummyp)
 
     Alarm(DEBUG, "%d Sent %d to server %d\n", 
 	  My_Client_ID, time_stamp, send_to_server);
-
-    if (USE_IPC_CLIENT) {
+    
+    //IPC = inter-process communication
+    if (USE_IPC_CLIENT) 
+    {
+        puts("entering sendto");
         ret = sendto(sd[send_to_server], update, sizeof(signed_update_message), 0,
                     (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
-        puts("test");
+        puts("exiting sendto");
     }
-    else {
+
+    else 
+    {
         ret = NET_Write(sd[send_to_server], update, sizeof(signed_update_message));
     }
 
