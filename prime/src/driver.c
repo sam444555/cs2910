@@ -717,7 +717,8 @@ void Send_Update(int dummy, void *dummyp)
   update_message *update_specific;
   int ret;
 
-  while(num_outstanding_updates < num_clients_to_emulate) {
+  while((num_outstanding_updates < num_clients_to_emulate) && (time_stamp<needed_count)) 
+  {
 
     /* Build a new update */
     update             = UTIL_New_Signed_Message();
