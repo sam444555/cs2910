@@ -174,7 +174,16 @@ int main(int argc, char** argv)
   time_stamp       = 0;
   total_time       = 0;
   //MS2022
-  VAR.Num_Servers=18;
+
+  /*
+    This line changes the number of servers set in usage to 18. I commented it out and instead
+    replaced it to 6 for testing purposes. TODO: remove all together. 
+  */
+  // VAR.Num_Servers=18;
+  VAR.Num_Servers=6;
+  
+  
+  
   //UTIL_Client_Load_Addresses(); 
   UTIL_Load_Addresses(); 
 
