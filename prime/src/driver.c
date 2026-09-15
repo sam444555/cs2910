@@ -752,6 +752,7 @@ void Send_Update(int dummy, void *dummyp)
     if (USE_IPC_CLIENT) {
         ret = sendto(sd[send_to_server], update, sizeof(signed_update_message), 0,
                     (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
+        puts("test");
     }
     else {
         ret = NET_Write(sd[send_to_server], update, sizeof(signed_update_message));
