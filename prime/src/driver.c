@@ -78,7 +78,7 @@
 
 /* Adjust this to configure how often a client prints. */
 /*#define PRINT_INTERVAL NUM_CLIENTS_TO_EMULATE*/
-#define PRINT_INTERVAL 10
+#define PRINT_INTERVAL 10000
 
 /* This sets the maximum number of updates a client can submit */
 #define MAX_ACTIONS 100000 
@@ -641,6 +641,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   if(response_specific->seq_num % PRINT_INTERVAL == 0)
     Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
                     time, response_specific->PO_time);
+  
   
   num_outstanding_updates--;
   
