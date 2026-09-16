@@ -78,7 +78,9 @@
 
 /* Adjust this to configure how often a client prints. */
 /*#define PRINT_INTERVAL NUM_CLIENTS_TO_EMULATE*/
-#define PRINT_INTERVAL 10000
+// #define PRINT_INTERVAL 10
+#define PRINT_INTERVAL 1000
+
 
 /* This sets the maximum number of updates a client can submit */
 #define MAX_ACTIONS 100000 
@@ -630,7 +632,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   
   UTIL_Stopwatch_Stop(&update_sw[response_specific->seq_num]);
   time = UTIL_Stopwatch_Elapsed(&update_sw[response_specific->seq_num]);
-  Alarm(STATUS, "Processing conf=%lu, seq=%d\ttotal=%f\tPO=%f\n",mess->global_configuration_number ,response_specific->seq_num, time,response_specific->PO_time);
+  // Alarm(STATUS, "Processing conf=%lu, seq=%d\ttotal=%f\tPO=%f\n",mess->global_configuration_number ,response_specific->seq_num, time,response_specific->PO_time);
 
 
   if (response_specific->PO_time < Min_PO_Time)
@@ -772,7 +774,7 @@ void Send_Update(int dummy, void *dummyp)
         {
           time_stamp--;
           dec_ref_cnt(update);
-          puts("INSIDE OF SOCKET OVERFLOW CONDITION!!!");
+          // puts("INSIDE OF SOCKET OVERFLOW CONDITION!!!");
           return;
         }
 
