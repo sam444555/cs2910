@@ -468,97 +468,6 @@ void Init_Client_Network(void)
     fflush(stdout); 
 }
 
-/***********************************************************/
-/* void Net_Cli_Recv(channel sk, int dummy, void *dummy_p) */
-/*                                                         */
-/* Called by the event system to receive data from socket  */
-/*                                                         */
-/* Arguments                                               */
-/*                                                         */
-/* sk:      socket                                         */
-/* dummy:   not used                                       */
-/* dummy_p: not used                                       */
-/*                                                         */
-/* Return Value                                            */
-/*                                                         */
-/* NONE                                                    */
-/*                                                         */
-/***********************************************************/
-
-void Net_Cli_Recv(channel sk, int dummy, void *dummy_p) 
-{
-  int32  received_bytes;
-  int32u expected_total_size = 0, remaining_bytes;
-  int    ret;
-  struct sockaddr_un from;
-  socklen_t from_len;
-
-  if (USE_IPC_CLIENT) {
-    from_len = sizeof(struct sockaddr_un);
-    ret = recvfrom(sk, srv_recv_scat.elements[0].buf, sizeof(packet), 0,
-                (struct sockaddr *)&from, &from_len);
-    if(ret <= 0) {
-      Alarm(PRINT, "%d read returned %d\n", My_Client_ID, ret);
-      fflush(stdout);
-      close(sk);
-      E_detach_fd(sk, READ_FD);
-      CLIENT_Cleanup();
-    }
-    received_bytes = ret;
-  }
-  else {
-      /* First read the signed message part (header), which can be used
-       * to determine the length of the rest of the message. */
-      ret = NET_Read(sk, srv_recv_scat.elements[0].buf, sizeof(signed_message));
-      if(ret <= 0) {
-        Alarm(DEBUG, "%d read returned %d\n", My_Client_ID, ret);
-        close(sk);
-        E_detach_fd(sk, READ_FD);
-        CLIENT_Cleanup();
-      }
-
-      expected_total_size = 
-        UTIL_Message_Size((signed_message *)srv_recv_scat.elements[0].buf);
-
-      remaining_bytes = expected_total_size - sizeof(signed_message);
-
-      Alarm(DEBUG, "Read %d bytes so far, expecting total size of %d\n",
-        ret, expected_total_size);
-
-      ret = NET_Read(sk, &srv_recv_scat.elements[0].buf[sizeof(signed_message)], 
-               remaining_bytes);
-      if(ret <= 0) {
-        Alarm(PRINT, "%d read returned %d\n", My_Client_ID, ret);
-        fflush(stdout);
-        close(sk);
-        E_detach_fd(sk, READ_FD);
-        CLIENT_Cleanup();
-      }
-      received_bytes = expected_total_size;
-  }
-    
-  //Alarm(DEBUG, "Received %d bytes!\n", received_bytes);
-  
-  /* Validate the client response */
-  if(!Validate_Message((signed_message*)srv_recv_scat.elements[0].buf, 
- 	       received_bytes)) {
-    Alarm(DEBUG,"CLIENT VALIDATION FAILURE\n");
-    return;
-  } 
-
-  /* Now process the message */
-  Process_Message( (signed_message*)(srv_recv_scat.elements[0].buf),  
-		   received_bytes);
-  
-  if(get_ref_cnt(srv_recv_scat.elements[0].buf) > 1) {
-    dec_ref_cnt(srv_recv_scat.elements[0].buf);
-    if((srv_recv_scat.elements[0].buf = 
-	(char *) new_ref_cnt(PACK_BODY_OBJ)) == NULL) {
-      Alarm(EXIT, "Net_Cli_Recv: Could not allocate packet body obj\n");
-    }
-  }
-}
-
 int32u Validate_Message( signed_message *mess, int32u num_bytes ) 
 {
   client_response_message *r;
@@ -671,6 +580,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
     printf("\nThroughput: %.2f updates/sec\n",throughput);
     printf("Number of Emulated Clients: %u\n",num_clients_to_emulate);
     printf("Total Updates Sent: %u\n",needed_count);
+    printf("Time elapsed: %.2f seconds\n",time_elapsed);
     //exit (remove this to get latency information from CLIENT_Cleanup())
     exit(0);
   }
@@ -891,8 +801,6 @@ double Compute_Average_Latency()
 }
 
 
-
-
 void Config_Recv(channel sk, int dummy, void *dummy_p){
   int ret,ret2;
   struct sockaddr_in from_addr;
@@ -963,3 +871,94 @@ void Config_Recv(channel sk, int dummy, void *dummy_p){
   }
 }
   
+
+/***********************************************************/
+/* void Net_Cli_Recv(channel sk, int dummy, void *dummy_p) */
+/*                                                         */
+/* Called by the event system to receive data from socket  */
+/*                                                         */
+/* Arguments                                               */
+/*                                                         */
+/* sk:      socket                                         */
+/* dummy:   not used                                       */
+/* dummy_p: not used                                       */
+/*                                                         */
+/* Return Value                                            */
+/*                                                         */
+/* NONE                                                    */
+/*                                                         */
+/***********************************************************/
+
+void Net_Cli_Recv(channel sk, int dummy, void *dummy_p) 
+{
+  int32  received_bytes;
+  int32u expected_total_size = 0, remaining_bytes;
+  int    ret;
+  struct sockaddr_un from;
+  socklen_t from_len;
+
+  if (USE_IPC_CLIENT) {
+    from_len = sizeof(struct sockaddr_un);
+    ret = recvfrom(sk, srv_recv_scat.elements[0].buf, sizeof(packet), 0,
+                (struct sockaddr *)&from, &from_len);
+    if(ret <= 0) {
+      Alarm(PRINT, "%d read returned %d\n", My_Client_ID, ret);
+      fflush(stdout);
+      close(sk);
+      E_detach_fd(sk, READ_FD);
+      CLIENT_Cleanup();
+    }
+    received_bytes = ret;
+  }
+  else {
+      /* First read the signed message part (header), which can be used
+       * to determine the length of the rest of the message. */
+      ret = NET_Read(sk, srv_recv_scat.elements[0].buf, sizeof(signed_message));
+      if(ret <= 0) {
+        Alarm(DEBUG, "%d read returned %d\n", My_Client_ID, ret);
+        close(sk);
+        E_detach_fd(sk, READ_FD);
+        CLIENT_Cleanup();
+      }
+
+      expected_total_size = 
+        UTIL_Message_Size((signed_message *)srv_recv_scat.elements[0].buf);
+
+      remaining_bytes = expected_total_size - sizeof(signed_message);
+
+      Alarm(DEBUG, "Read %d bytes so far, expecting total size of %d\n",
+        ret, expected_total_size);
+
+      ret = NET_Read(sk, &srv_recv_scat.elements[0].buf[sizeof(signed_message)], 
+               remaining_bytes);
+      if(ret <= 0) {
+        Alarm(PRINT, "%d read returned %d\n", My_Client_ID, ret);
+        fflush(stdout);
+        close(sk);
+        E_detach_fd(sk, READ_FD);
+        CLIENT_Cleanup();
+      }
+      received_bytes = expected_total_size;
+  }
+    
+  //Alarm(DEBUG, "Received %d bytes!\n", received_bytes);
+  
+  /* Validate the client response */
+  if(!Validate_Message((signed_message*)srv_recv_scat.elements[0].buf, 
+ 	       received_bytes)) {
+    Alarm(DEBUG,"CLIENT VALIDATION FAILURE\n");
+    return;
+  } 
+
+  /* Now process the message */
+  Process_Message( (signed_message*)(srv_recv_scat.elements[0].buf),  
+		   received_bytes);
+  
+  if(get_ref_cnt(srv_recv_scat.elements[0].buf) > 1) {
+    dec_ref_cnt(srv_recv_scat.elements[0].buf);
+    if((srv_recv_scat.elements[0].buf = 
+	(char *) new_ref_cnt(PACK_BODY_OBJ)) == NULL) {
+      Alarm(EXIT, "Net_Cli_Recv: Could not allocate packet body obj\n");
+    }
+  }
+}

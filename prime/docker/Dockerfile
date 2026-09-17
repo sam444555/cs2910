@@ -1,29 +1,4 @@
-#NOTES:
-#   This is running on Docker for Windows and may experience issues in other OS environments
-#   Todo:
-#       >add macOS version
-#       >add keygen optimizations
-#
-#   Building the image: docker build -t replica-image .
-#   Building the image fresh: docker build --no-cache -t replica-image .
-
-# Using ubuntu 22.04 [replace with almalinux:9 if any issues]
-FROM ubuntu:22.04
-
-# Install dependencies [note: flex, bison, byacc required for spines parser]
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    gcc \
-    g++ \
-    make \
-    libssl-dev \
-    flex \
-    bison \
-    git \
-    groff \
-    python3
-    # groff required for libspread-util manual pages during compiliation, fixes E_get_time.0 issue
-    # if python doesn't work use python3
+FROM prime-base
 
 # Clone the CS2910 repository [in the root directory]
 WORKDIR /root
