@@ -132,9 +132,6 @@ static sys_scatter srv_recv_scat;
 
 int32u num_outstanding_updates;
 
-//used for throughput measurement, passed as a command line argument
-int32u num_clients_to_emulate = 1;
-
 
 int32u send_to_server;
 int32u last_executed = 0;
@@ -144,7 +141,6 @@ util_stopwatch update_sw[MAX_ACTIONS];
 
 util_stopwatch sw;  // unused?
 util_stopwatch latency_sw;
-util_stopwatch throughput_sw;
 
 signed_message *pending_update;
 double Latencies[MAX_ACTIONS];
@@ -152,6 +148,16 @@ int32u Histogram[NUM_BUCKETS];
 double Min_PO_Time, Max_PO_Time;
 /* FILE *fp; */
 struct sockaddr_un Conn;
+
+/* Variables added for throughput testing */
+
+//Tracks the number of failed sends to the prime server due to high-throughput/high-load environments. 
+int32u failed_sends = 0;
+util_stopwatch throughput_sw;
+//Number of clients the driver emulates, now passed as a command-line argument using the -c flag. 
+int32u num_clients_to_emulate = 1;
+
+
 
 
 void clean_exit(int signum)
@@ -220,6 +226,221 @@ int main(int argc, char** argv)
 
   return 0;
 }
+
+void Process_Message( signed_message *mess, int32u num_bytes ) 
+{
+  client_response_message *response_specific;
+  double time;
+
+  Alarm(DEBUG, "Received mess type=%d\n",mess->type);
+
+  response_specific = (client_response_message *)(mess+1);
+  
+  UTIL_Stopwatch_Stop(&update_sw[response_specific->seq_num]);
+  time = UTIL_Stopwatch_Elapsed(&update_sw[response_specific->seq_num]);
+  // Alarm(STATUS, "Processing conf=%lu, seq=%d\ttotal=%f\tPO=%f\n",mess->global_configuration_number ,response_specific->seq_num, time,response_specific->PO_time);
+
+
+  if (response_specific->PO_time < Min_PO_Time)
+    Min_PO_Time = response_specific->PO_time;
+  if (response_specific->PO_time > Max_PO_Time)
+    Max_PO_Time = response_specific->PO_time;
+
+  if(response_specific->seq_num % PRINT_INTERVAL == 0)
+    Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
+                    time, response_specific->PO_time);
+  
+  
+  num_outstanding_updates--;
+  
+  /*
+      Throughput measurement exit condition: No outstanding updates and all 
+      client requested updates have been delivered
+
+      TODO: make this a function for readability
+  */
+  if(num_outstanding_updates==0 && time_stamp==needed_count)
+  {
+    //stop timer
+    UTIL_Stopwatch_Stop(&throughput_sw);
+    //time elapsed [since first update sent to the final one]
+    double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
+    //calc throughput = completed requests/elapsed time 
+    // where completed requests = needed_count (input num of requests)
+    double throughput = (double)needed_count/time_elapsed;
+    //print results:
+    /*
+        Throughput in updates/sec
+        Total number of Emulated Clients
+        Total updates sent
+    */
+    printf("\nThroughput: %.2f updates/sec\n",throughput);
+    printf("Number of Emulated Clients: %u\n",num_clients_to_emulate);
+    printf("Total Updates Sent: %u\n",needed_count);
+    printf("Time elapsed: %.2f seconds\n",time_elapsed);
+    printf("Total failed sends: %u\n",failed_sends);
+    //exit (remove this to get latency information from CLIENT_Cleanup())
+    exit(0);
+  }
+
+
+  if(time_stamp<needed_count)
+  {
+  	Send_Update(0, NULL);
+  }
+  return;
+}
+
+void Run_Client()
+{
+  memset(executed, 0, sizeof(int32u) * MAX_ACTIONS);
+  memset(Histogram, 0, sizeof(int32u) * NUM_BUCKETS);
+
+  Max_PO_Time = 0;
+  Min_PO_Time = 9999;
+
+  num_outstanding_updates = 0;
+  my_incarnation = E_get_time().sec;
+
+  if(My_Server_ID != 0)
+    send_to_server = My_Server_ID;
+  else
+    send_to_server = 1;
+  /*
+    Time begins for throughput testing
+  */
+  UTIL_Stopwatch_Start(&throughput_sw);
+
+  if(time_stamp<needed_count)
+  {
+  	Send_Update(0, NULL);
+  }
+
+}
+
+void Send_Update(int dummy, void *dummyp)
+{
+  signed_message *update;
+  update_message *update_specific;
+  int ret;
+
+  while((num_outstanding_updates < num_clients_to_emulate) && (time_stamp<needed_count)) 
+  {
+
+    /* Build a new update */
+    update             = UTIL_New_Signed_Message();
+    update->machine_id = My_Client_ID;
+    update->len        = sizeof(update_message) + UPDATE_SIZE;
+    update->type       = UPDATE;
+    update->global_configuration_number =my_global_configuration_number;
+
+    update_specific = (update_message*)(update+1);
+
+    time_stamp++; 
+    //update_specific->server_id   = send_to_server;
+    update_specific->server_id   = My_Client_ID;
+    update->incarnation          = my_incarnation;
+    update_specific->seq_num     = time_stamp; 
+    update_specific->address     = NET.My_Address;
+    update_specific->port        = NET.Client_Port;
+
+    /* Start the clock on this update */
+    UTIL_Stopwatch_Start(&update_sw[time_stamp]);
+
+    /* Sign the message */
+    //update->mt_num   = 1;
+    //update->mt_index = 1;
+
+    if(CLIENTS_SIGN_UPDATES)
+      UTIL_RSA_Sign_Message(update);
+
+    Alarm(DEBUG, "%d Sent %d to server %d\n", 
+	  My_Client_ID, time_stamp, send_to_server);
+    
+    //IPC = inter-process communication
+    if (USE_IPC_CLIENT) 
+    {
+
+        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
+                    (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
+        
+        /*
+            Bug: When num_clients_to_emulate>=25, the driver successfully sends a few messages but
+            eventually stalls indefinitely. Current debugging leads me to believe that the 
+            prime process's socket receive buffer becomes full and the kernel blocks the 
+            driver process until buffer space becomes available. For some reason the driver 
+            process never wakes up, resulting in a deadlock. 
+        
+            The current fix (untested) is to make sendto nonblocking and if this issue arises 
+            return from the function and try again.
+        */                    
+        if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
+        {
+          time_stamp--;
+          failed_sends++;
+          dec_ref_cnt(update);
+          // puts("INSIDE OF SOCKET OVERFLOW CONDITION!!!");
+          return;
+        }
+
+
+    }
+
+    else 
+    {
+        ret = NET_Write(sd[send_to_server], update, sizeof(signed_update_message));
+    }
+
+    if(ret <= 0) {
+      perror("sendto prime");
+      fflush(stdout);
+      close(sd[send_to_server]);
+      E_detach_fd(sd[send_to_server], READ_FD);
+      CLIENT_Cleanup();
+    }
+    
+    dec_ref_cnt(update);
+
+    /*
+        If no specific server is selected (which gets passed into the command line)
+        this code executes and sends the update to a random server. 
+    */
+
+    /* If we're rotating across all servers, send the next one to the 
+     * next server modulo the total number of servers. */
+//     if(My_Server_ID == 0) 
+//     {
+
+// #if 0
+//       send_to_server++;
+//       send_to_server = send_to_server % (NUM_SERVERS);
+// #endif
+//       send_to_server = rand() % MAX_NUM_SERVERS;
+//       if(send_to_server == 0)
+//         send_to_server = MAX_NUM_SERVERS;
+//     }
+
+    num_outstanding_updates++;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+  CAN IGNORE/ABSTRACT BELOW FUNCTIONS FOR NOW
+*/
+
+
 
 void Init_Memory_Objects(void)
 {
@@ -530,204 +751,6 @@ int32u Validate_Message( signed_message *mess, int32u num_bytes )
   return 1;  
 }
 
-void Process_Message( signed_message *mess, int32u num_bytes ) 
-{
-  client_response_message *response_specific;
-  double time;
-
-  Alarm(DEBUG, "Received mess type=%d\n",mess->type);
-
-  response_specific = (client_response_message *)(mess+1);
-  
-  UTIL_Stopwatch_Stop(&update_sw[response_specific->seq_num]);
-  time = UTIL_Stopwatch_Elapsed(&update_sw[response_specific->seq_num]);
-  // Alarm(STATUS, "Processing conf=%lu, seq=%d\ttotal=%f\tPO=%f\n",mess->global_configuration_number ,response_specific->seq_num, time,response_specific->PO_time);
-
-
-  if (response_specific->PO_time < Min_PO_Time)
-    Min_PO_Time = response_specific->PO_time;
-  if (response_specific->PO_time > Max_PO_Time)
-    Max_PO_Time = response_specific->PO_time;
-
-  if(response_specific->seq_num % PRINT_INTERVAL == 0)
-    Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
-                    time, response_specific->PO_time);
-  
-  
-  num_outstanding_updates--;
-  
-  /*
-      Throughput measurement exit condition: No outstanding updates and all 
-      client requested updates have been delivered
-
-      TODO: make this a function for readability
-  */
-  if(num_outstanding_updates==0 && time_stamp==needed_count)
-  {
-    //stop timer
-    UTIL_Stopwatch_Stop(&throughput_sw);
-    //time elapsed [since first update sent to the final one]
-    double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
-    //calc throughput = completed requests/elapsed time 
-    // where completed requests = needed_count (input num of requests)
-    double throughput = (double)needed_count/time_elapsed;
-    //print results:
-    /*
-        Throughput in updates/sec
-        Total number of Emulated Clients
-        Total updates sent
-    */
-    printf("\nThroughput: %.2f updates/sec\n",throughput);
-    printf("Number of Emulated Clients: %u\n",num_clients_to_emulate);
-    printf("Total Updates Sent: %u\n",needed_count);
-    printf("Time elapsed: %.2f seconds\n",time_elapsed);
-    //exit (remove this to get latency information from CLIENT_Cleanup())
-    exit(0);
-  }
-
-
-
-  //sleep(1);
-  //usleep(100000);
-  /* Wait for a random delay */
-  /* usleep(rand() % DELAY_RANGE); */
-  if(time_stamp<needed_count){
-  	Send_Update(0, NULL);
-  }
-  return;
-}
-
-void Run_Client()
-{
-  memset(executed, 0, sizeof(int32u) * MAX_ACTIONS);
-  memset(Histogram, 0, sizeof(int32u) * NUM_BUCKETS);
-
-  Max_PO_Time = 0;
-  Min_PO_Time = 9999;
-
-  num_outstanding_updates = 0;
-  my_incarnation = E_get_time().sec;
-
-  if(My_Server_ID != 0)
-    send_to_server = My_Server_ID;
-  else
-    send_to_server = 1;
-  /*
-    Time begins for throughput testing
-  */
-  UTIL_Stopwatch_Start(&throughput_sw);
-
-  if(time_stamp<needed_count)
-  {
-  	Send_Update(0, NULL);
-  }
-
-}
-
-void Send_Update(int dummy, void *dummyp)
-{
-  signed_message *update;
-  update_message *update_specific;
-  int ret;
-
-  while((num_outstanding_updates < num_clients_to_emulate) && (time_stamp<needed_count)) 
-  {
-
-    /* Build a new update */
-    update             = UTIL_New_Signed_Message();
-    update->machine_id = My_Client_ID;
-    update->len        = sizeof(update_message) + UPDATE_SIZE;
-    update->type       = UPDATE;
-    update->global_configuration_number =my_global_configuration_number;
-
-    update_specific = (update_message*)(update+1);
-
-    time_stamp++; 
-    //update_specific->server_id   = send_to_server;
-    update_specific->server_id   = My_Client_ID;
-    update->incarnation          = my_incarnation;
-    update_specific->seq_num     = time_stamp; 
-    update_specific->address     = NET.My_Address;
-    update_specific->port        = NET.Client_Port;
-
-    /* Start the clock on this update */
-    UTIL_Stopwatch_Start(&update_sw[time_stamp]);
-
-    /* Sign the message */
-    //update->mt_num   = 1;
-    //update->mt_index = 1;
-
-    if(CLIENTS_SIGN_UPDATES)
-      UTIL_RSA_Sign_Message(update);
-
-    Alarm(DEBUG, "%d Sent %d to server %d\n", 
-	  My_Client_ID, time_stamp, send_to_server);
-    
-    //IPC = inter-process communication
-    if (USE_IPC_CLIENT) 
-    {
-
-        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
-                    (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
-        
-        /*
-            Bug: When num_clients_to_emulate>=25, the driver successfully sends a few messages but
-            eventually stalls indefinitely. Current debugging leads me to believe that the 
-            prime process's socket receive buffer becomes full and the kernel blocks the 
-            driver process until buffer space becomes available. For some reason the driver 
-            process never wakes up, resulting in a deadlock. 
-        
-            The current fix (untested) is to make sendto nonblocking and if this issue arises 
-            return from the function and try again.
-        */                    
-        if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
-        {
-          time_stamp--;
-          dec_ref_cnt(update);
-          // puts("INSIDE OF SOCKET OVERFLOW CONDITION!!!");
-          return;
-        }
-
-
-    }
-
-    else 
-    {
-        ret = NET_Write(sd[send_to_server], update, sizeof(signed_update_message));
-    }
-
-    if(ret <= 0) {
-      perror("sendto prime");
-      fflush(stdout);
-      close(sd[send_to_server]);
-      E_detach_fd(sd[send_to_server], READ_FD);
-      CLIENT_Cleanup();
-    }
-    
-    dec_ref_cnt(update);
-
-    /*
-        If no specific server is selected (which gets passed into the command line)
-        this code executes and sends the update to a random server. 
-    */
-
-    /* If we're rotating across all servers, send the next one to the 
-     * next server modulo the total number of servers. */
-//     if(My_Server_ID == 0) 
-//     {
-
-// #if 0
-//       send_to_server++;
-//       send_to_server = send_to_server % (NUM_SERVERS);
-// #endif
-//       send_to_server = rand() % MAX_NUM_SERVERS;
-//       if(send_to_server == 0)
-//         send_to_server = MAX_NUM_SERVERS;
-//     }
-
-    num_outstanding_updates++;
-  }
-}
 
 void CLIENT_Cleanup()
 {

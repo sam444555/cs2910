@@ -1,8 +1,9 @@
-# # # STAGE 1: Build prime-base, which consists of the OS and dependencies.  # # # 
+# # # STAGE 1: Build prime-base image, which consists of the OS and dependencies.  # # # 
 
 docker build -f Dockerfile.base -t prime-base .
 
  # # #  STAGE 2: Download the github repo and setup spines & prime # # # 
 
-docker build --no-cache -t replica-image .
+docker build --no-cache -t replica-img .
 
+# Subsequent builds should only run stage 2 unless the OS/ dependencies change. 
