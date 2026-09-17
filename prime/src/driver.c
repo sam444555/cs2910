@@ -63,6 +63,10 @@
 #include "merkle.h"
 #include "spines_lib.h"
 
+
+#include <sys/ioctl.h> //delete
+#include <linux/sockios.h>//delete
+
 /* The behavior of the client can be controlled with parameters that follow */
 
 /* A single client process can be made to act like several clients by
@@ -365,23 +369,25 @@ void Send_Update(int dummy, void *dummyp)
                     (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
         
         /*
-            Bug: When num_clients_to_emulate>=25, the driver successfully sends a few messages but
-            eventually stalls indefinitely. Current debugging leads me to believe that the 
-            prime process's socket receive buffer becomes full and the kernel blocks the 
-            driver process until buffer space becomes available. For some reason the driver 
-            process never wakes up, resulting in a deadlock. 
-        
-            The current fix (untested) is to make sendto nonblocking and if this issue arises 
-            return from the function and try again.
+          In high-throughput environments, the driver's socket's send queue will often reach capacity and will reject
+          any remaining sends. The original driver code would block the process when this would occur, however there were
+          cases when it would never wake up.  
         */                    
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
+          // DELETE BELOW
+             int queued;
+            ioctl(sd[send_to_server], TIOCOUTQ, &queued);
+            printf("Socket full: %d bytes queued\n", queued);
+            exit(1);
+          // DELETE ABOVE
+
           time_stamp--;
           failed_sends++;
           dec_ref_cnt(update);
-          // puts("INSIDE OF SOCKET OVERFLOW CONDITION!!!");
           return;
         }
+
 
 
     }
