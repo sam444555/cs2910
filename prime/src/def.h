@@ -123,7 +123,7 @@
  * same physical machine. Using Inter-Process Communication will speed up 
  * (in terms of latency) messaging between the client and replica when
  * sending messages with more than just a few bytes */
-#define USE_IPC_CLIENT 0
+#define USE_IPC_CLIENT 1
 #define REPLICA_IPC_PATH "/tmp/prime_replica"
 #define CLIENT_IPC_PATH "/tmp/prime_client"
 #define CA_DRIVER_IPC_PATH "/tmp/ca_driver_ipc"
