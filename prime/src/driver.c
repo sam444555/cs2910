@@ -382,14 +382,12 @@ void Send_Update(int dummy, void *dummyp)
         {
             printf("sendto error: %s\n", strerror(errno));
             fflush(stdout);
+            printf("EAGAIN: outstanding=%d timestamp=%d\n",
+       num_outstanding_updates, time_stamp);
         }
         
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
-          if(num_outstanding_updates==0)
-          {
-            puts("There are no outstanding updates!");
-          }
 
           time_stamp--;
           failed_sends++;
