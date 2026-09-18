@@ -153,6 +153,7 @@ struct sockaddr_un Conn;
 
 //Tracks the number of failed sends to the prime server due to high-throughput/high-load environments. 
 int32u failed_sends = 0;
+//Used to measure start --> stop time
 util_stopwatch throughput_sw;
 //Number of clients the driver emulates, now passed as a command-line argument using the -c flag. 
 int32u num_clients_to_emulate = 1;
@@ -375,7 +376,14 @@ void Send_Update(int dummy, void *dummyp)
           
           Possible fixes could include lowering the number of outstanding updates or 
           increasing the size of the send buffer.
-        */                    
+        */              
+
+        if (ret == -1) 
+        {
+            printf("sendto error: %s\n", strerror(errno));
+            fflush(stdout);
+        }
+        
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
           if(num_outstanding_updates==0)
