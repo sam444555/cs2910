@@ -16,7 +16,7 @@ docker build --no-cache -t replica-img .
 ```
 This builds another image on top of prime-base which clones the most up to date version of this repository and then sets up Prime/Spines. 
 
-## Step 2
+## Step 3
 With the same directory open, run: 
 
 ```bash
@@ -24,7 +24,7 @@ docker compose up
 ```
 This creates all containers and starts them and their respective processes/services (as specified in docker-compose.yml). 
 
-## Step 3
+## Step 4
 In a separate terminal window, run: 
 
 ```bash
@@ -32,7 +32,7 @@ docker exec -it prime1 bash
 ```
 This opens an interactive Bash shell inside the **prime1** container. 
 
-## Step 4 
+## Step 5 
 In the same window open from step 3, you can now run the driver program using:
 
 ```bash
