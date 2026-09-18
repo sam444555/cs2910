@@ -236,6 +236,13 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   Alarm(DEBUG, "Received mess type=%d\n",mess->type);
 
   response_specific = (client_response_message *)(mess+1);
+
+      printf("RESPONSE: seq=%u outstanding=%u\n",
+           response_specific->seq_num,
+           num_outstanding_updates);
+    fflush(stdout);
+
+
   
   UTIL_Stopwatch_Stop(&update_sw[response_specific->seq_num]);
   time = UTIL_Stopwatch_Elapsed(&update_sw[response_specific->seq_num]);
@@ -377,15 +384,6 @@ void Send_Update(int dummy, void *dummyp)
           Possible fixes could include lowering the number of outstanding updates or 
           increasing the size of the send buffer.
         */              
-
-        if (ret == -1) 
-        {
-            printf("sendto error: %s\n", strerror(errno));
-            fflush(stdout);
-            printf("EAGAIN: outstanding=%d timestamp=%d\n",
-       num_outstanding_updates, time_stamp);
-        }
-        
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
 
