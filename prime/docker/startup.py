@@ -5,14 +5,13 @@ id = int(sys.argv[1])
 # replica ip address (ip = 172.20.0.[0 + replica id + 1])
 ip = f'172.20.0.{id+1}'
 
-# # add 20 ms outgoing network delay (~40 ms RTT)
-# # and limit outgoing bandwidth to 100 Mbps
-# subprocess.run(
-#     "tc qdisc add dev eth0 root netem delay 20ms rate 100mbit",
-#     shell=True,
-#     check=True
-# )
-
+# add n ms outgoing network delay 
+# and limit outgoing bandwidth to 100 Mbps
+subprocess.run(
+    "tc qdisc add dev eth0 root netem delay 2.5ms rate 100mbit",
+    shell=True,
+    check=True
+)
 
 # start spines: ./spines -I <ip address> 
 spines =subprocess.Popen(f"./spines -I {ip}", cwd='/root/cs2910/prime/spines/daemon', shell=True)
