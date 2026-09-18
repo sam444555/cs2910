@@ -5,4 +5,4 @@
 The current version includes a locally deployed six-replica topology using Docker to evaluate the feasibility of Prime as the BFT replication engine.
 
 ## Prime and Spines Configuration
-TODO: COMPLETE ME!!!
+### THIS IS A TEST
