@@ -6,3 +6,4 @@ With a terminal window open in `cs2910/prime/docker` run:
 ```bash
 docker build -f Dockerfile.base -t prime-base .
 ```
+This builds the base image which consists of the OS and dependencies. **This should only be run once unless you want to change the OS or add/remove dependencies**. 
