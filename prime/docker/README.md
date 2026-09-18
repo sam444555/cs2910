@@ -1,5 +1,8 @@
 # Docker Setup Guide
 
+## Step 0: Complete Prime and Spines Configuration
+Before proceeding, follow the Prime and Spines configuration steps located in the root directory of this repository.
+
 ## Step 1
 With a terminal window open in `cs2910/prime/docker` run:
 
@@ -42,6 +45,8 @@ Example input:
 ```bash
 ./driver -l 172.20.0.2 -i 1 -s 1 -c 10000 -n 24
 ```
+
+
 
 # Docker Teardown Guide
 With a terminal window open in `cs2910/prime/docker` run:
