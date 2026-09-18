@@ -5,10 +5,10 @@ id = int(sys.argv[1])
 # replica ip address (ip = 172.20.0.[0 + replica id + 1])
 ip = f'172.20.0.{id+1}'
 
-# add 10 ms outgoing network delay (~20 ms RTT)
-# and limit outgoing bandwidth to 10 Mbps
+# add 0.5 ms outgoing network delay (~1 ms RTT)
+# and limit outgoing bandwidth to 100 Mbps
 subprocess.run(
-    "tc qdisc add dev eth0 root netem delay 10ms rate 100mbit",
+    "tc qdisc add dev eth0 root netem delay 0.5ms rate 100mbit",
     shell=True,
     check=True
 )
