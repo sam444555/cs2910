@@ -237,10 +237,6 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 
   response_specific = (client_response_message *)(mess+1);
 
-      printf("RESPONSE: seq=%u outstanding=%u\n",
-           response_specific->seq_num,
-           num_outstanding_updates);
-    fflush(stdout);
 
 
   
@@ -259,7 +255,11 @@ void Process_Message( signed_message *mess, int32u num_bytes )
                     time, response_specific->PO_time);
   
   
-  num_outstanding_updates--;
+    num_outstanding_updates--;
+
+
+
+
   
   /*
       Throughput measurement exit condition: No outstanding updates and all 
