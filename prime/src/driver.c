@@ -378,7 +378,11 @@ void Send_Update(int dummy, void *dummyp)
         */                    
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
-  
+          if(num_outstanding_updates==0)
+          {
+            puts("There are no outstanding updates!");
+          }
+
           time_stamp--;
           failed_sends++;
           dec_ref_cnt(update);
