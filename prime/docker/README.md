@@ -43,6 +43,22 @@ Example input:
 ./driver -l 172.20.0.2 -i 1 -s 1 -c 10000 -n 24
 ```
 
+# Docker Teardown Guide
+With a terminal window open in `cs2910/prime/docker` run:
+
+```bash
+docker compose down
+```
+This terminates and deletes all existing containers and the Docker network. If any changes are pushed to the GitHub and you want these to be reflected in 
+a new image restart this process starting from Step 2. 
+
+To delete the images, run:
+
+```bash
+docker rmi replica-img prime-base
+```
+
+
 
 
 
