@@ -63,10 +63,6 @@
 #include "merkle.h"
 #include "spines_lib.h"
 
-
-#include <sys/ioctl.h> //delete
-#include <linux/sockios.h>//delete
-
 /* The behavior of the client can be controlled with parameters that follow */
 
 /* A single client process can be made to act like several clients by
@@ -371,17 +367,18 @@ void Send_Update(int dummy, void *dummyp)
         /*
           In high-throughput environments, the driver's socket's send queue will often reach capacity and will reject
           any remaining sends. The original driver code would block the process when this would occur, however there were
-          cases when it would never wake up.  
+          cases when it would block indefinitely. 
+          
+          I am still not 100% sure why this is occurring. Making it non-blocking seems to have fixed it for the most part, 
+          but there are still cases when the driver deadlocks & the program comes to a standstill. This could be due to an 
+          unintended logic error or how prime handles its IPC socket. 
+          
+          Possible fixes could include lowering the number of outstanding updates or 
+          increasing the size of the send buffer.
         */                    
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
-          // DELETE BELOW
-             int queued;
-            ioctl(sd[send_to_server], TIOCOUTQ, &queued);
-            printf("Socket full: %d bytes queued\n", queued);
-            exit(1);
-          // DELETE ABOVE
-
+  
           time_stamp--;
           failed_sends++;
           dec_ref_cnt(update);
