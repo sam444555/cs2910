@@ -21,6 +21,8 @@ services:
   prime1:
     image: replica-img
     container_name: prime1
+    cap_add:
+      - NET_ADMIN
     networks:
       prime-net:
         ipv4_address: 172.20.0.2
@@ -29,6 +31,8 @@ services:
   prime2:
     image: replica-img
     container_name: prime2
+    cap_add:
+      - NET_ADMIN
     networks:
       prime-net:
         ipv4_address: 172.20.0.3
@@ -37,6 +41,8 @@ services:
   prime3:
     image: replica-img
     container_name: prime3
+    cap_add:
+      - NET_ADMIN
     networks:
       prime-net:
         ipv4_address: 172.20.0.4
@@ -45,6 +51,8 @@ services:
   prime4:
     image: replica-img
     container_name: prime4
+    cap_add:
+      - NET_ADMIN
     networks:
       prime-net:
         ipv4_address: 172.20.0.5
@@ -53,6 +61,8 @@ services:
   prime5:
     image: replica-img
     container_name: prime5
+    cap_add:
+      - NET_ADMIN
     networks:
       prime-net:
         ipv4_address: 172.20.0.6
@@ -61,6 +71,8 @@ services:
   prime6:
     image: replica-img
     container_name: prime6
+    cap_add:
+      - NET_ADMIN
     networks:
       prime-net:
         ipv4_address: 172.20.0.7
