@@ -8,7 +8,7 @@ ip = f'172.20.0.{id+1}'
 # add 0.5 ms outgoing network delay (~1 ms RTT)
 # and limit outgoing bandwidth to 100 Mbps
 subprocess.run(
-    "tc qdisc add dev eth0 root netem delay 0.5ms rate 100mbit",
+    "tc qdisc add dev eth0 root netem delay 0.0ms rate 100mbit",
     shell=True,
     check=True
 )
