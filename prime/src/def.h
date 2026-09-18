@@ -95,7 +95,7 @@
 #define CATCHUP_HISTORY 10
 
 /* Number of outstanding PO_requests that have not yet been executed */
-#define MAX_PO_IN_FLIGHT 50
+#define MAX_PO_IN_FLIGHT 20
 
 /* How often to print that Prime is making progress - based on number of
  * ordinals that have been ordered */
@@ -123,7 +123,7 @@
  * same physical machine. Using Inter-Process Communication will speed up 
  * (in terms of latency) messaging between the client and replica when
  * sending messages with more than just a few bytes */
-#define USE_IPC_CLIENT 1
+#define USE_IPC_CLIENT 0
 #define REPLICA_IPC_PATH "/tmp/prime_replica"
 #define CLIENT_IPC_PATH "/tmp/prime_client"
 #define CA_DRIVER_IPC_PATH "/tmp/ca_driver_ipc"
