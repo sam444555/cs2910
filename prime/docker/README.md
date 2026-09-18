@@ -1,6 +1,6 @@
 # Docker Setup Guide
 
-## Step 0
+## Prerequisite
 Before proceeding, follow the Prime and Spines configuration steps located in the root directory of this repository.
 
 ## Step 1
