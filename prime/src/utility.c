@@ -1450,13 +1450,24 @@ void UTIL_Write_Client_Response(signed_message *mess)
   }
 
 #if USE_IPC_CLIENT
-  util_stopwatch ipc_send_time;
-  UTIL_Stopwatch_Start(&ipc_send_time);
-  ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
-  UTIL_Stopwatch_Stop(&ipc_send_time);
-  DATA.SIG.ipc_send_agg += UTIL_Stopwatch_Elapsed(&ipc_send_time);
-  //DATA.SIG.ipc_send_msg[DATA.SIG.ipc_count] = UTIL_Stopwatch_Elapsed(&ipc_send_time);
-  //DATA.SIG.ipc_count++;
+  /*
+    Remove unnecessary sends - only respond 
+    to the client process associated with this replica 
+
+    If replica ID == client ID then send (where client ID = machine_id-MAX_NUM_SERVER_SLOTS offset)
+
+    MAX_NUM_SERVER_SLOTS offset used so client and server IDs do not collide
+  */
+  if(machine_id-MAX_NUM_SERVER_SLOTS  == VAR.My_Server_ID)
+  {
+    util_stopwatch ipc_send_time;
+    UTIL_Stopwatch_Start(&ipc_send_time);
+    ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
+    UTIL_Stopwatch_Stop(&ipc_send_time);
+    DATA.SIG.ipc_send_agg += UTIL_Stopwatch_Elapsed(&ipc_send_time);
+    //DATA.SIG.ipc_send_msg[DATA.SIG.ipc_count] = UTIL_Stopwatch_Elapsed(&ipc_send_time);
+    //DATA.SIG.ipc_count++;
+  }
 #else
   ret = NET_Write(NET.to_client_sd, mess, size);
 #endif
