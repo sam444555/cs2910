@@ -1458,9 +1458,12 @@ void UTIL_Write_Client_Response(signed_message *mess)
 
     MAX_NUM_SERVER_SLOTS offset used so client and server IDs do not collide
   */
+
+  Alarm(PRINT, "Server ID: %d, Client ID: %d\n",
+      VAR.My_Server_ID, machine_id - MAX_NUM_SERVER_SLOTS);
+
   if(machine_id-MAX_NUM_SERVER_SLOTS  == VAR.My_Server_ID)
   {
-    puts("this is a test");
     util_stopwatch ipc_send_time;
     UTIL_Stopwatch_Start(&ipc_send_time);
     ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
