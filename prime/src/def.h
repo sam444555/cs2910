@@ -99,7 +99,7 @@
 
 /* How often to print that Prime is making progress - based on number of
  * ordinals that have been ordered */
-#define PRINT_PROGRESS 10000
+#define PRINT_PROGRESS 1000
 
 /*--------------------Networking Settings-----------------------------------*/
 
