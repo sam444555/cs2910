@@ -1468,6 +1468,7 @@ void UTIL_Write_Client_Response(signed_message *mess)
     //DATA.SIG.ipc_send_msg[DATA.SIG.ipc_count] = UTIL_Stopwatch_Elapsed(&ipc_send_time);
     //DATA.SIG.ipc_count++;
   }
+  else return;
 #else
   ret = NET_Write(NET.to_client_sd, mess, size);
 #endif
