@@ -1460,6 +1460,7 @@ void UTIL_Write_Client_Response(signed_message *mess)
   */
   if(machine_id-MAX_NUM_SERVER_SLOTS  == VAR.My_Server_ID)
   {
+    puts("this is a test");
     util_stopwatch ipc_send_time;
     UTIL_Stopwatch_Start(&ipc_send_time);
     ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
@@ -1468,7 +1469,8 @@ void UTIL_Write_Client_Response(signed_message *mess)
     //DATA.SIG.ipc_send_msg[DATA.SIG.ipc_count] = UTIL_Stopwatch_Elapsed(&ipc_send_time);
     //DATA.SIG.ipc_count++;
   }
-  else return;
+  else 
+  {return;}
 #else
   ret = NET_Write(NET.to_client_sd, mess, size);
 #endif
