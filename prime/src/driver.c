@@ -260,7 +260,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-      Alarm(PRINT, "Updates Processed=%d\tExecution Time=%f sec\n",
+      printf("Updates Processed=%d\tExecution Time=%f sec\n",
             response_specific->seq_num, elapsed_sec);
       fflush(stdout);
   }
