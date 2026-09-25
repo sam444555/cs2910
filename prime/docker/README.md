@@ -87,3 +87,19 @@ wsl --shutdown
 ```
 
 WSL will automatically restart the next time it is launched.
+
+If this issue persists, try also disabling Ubuntu's NTP synchronization using the following command inside of a WSL2 terminal:
+```ini
+sudo timedatectl set-ntp false
+```
+To verify, run the following command inside of the same terminal:
+```ini
+timedatectl
+```
+
+If the issues persist I would recommend abandoning the Docker setup entirely and running Prime in a native Linux environment. If Windows is absolutely required, I have found that more often than not 
+the cause is Windows' virtualization environment & researching known bugs associated with it can help lead to a solution.
+
+
+
+
