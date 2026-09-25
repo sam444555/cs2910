@@ -66,6 +66,15 @@ docker rmi replica-img prime-base
 
 ## Windows / WSL2 Virtualization Issues
 
+### Clock Synchronization Issue
+Following a Windows update, for reasons that still remain unclear, WSL's clock synchronization mechanism was incorrectly adjusting the virtual Linux system's clock forward by 5-6 seconds. This shift 
+resulted in issues with Spines, leading to a significant drop in Prime's overall throughput performance. 
 
+The issue was resolved by disabling Hyper-V's implicit time synchronization mechanism within WSL2. 
+
+In the Windows `.wslconfig` file under the `[wsl2]` section, add:
+
+```ini
+kernelCommandLine=hv_utils.timesync_implicit=0
 
 
