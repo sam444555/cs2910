@@ -379,8 +379,7 @@ void Send_Update(int dummy, void *dummyp)
     update_specific->address     = NET.My_Address;
     update_specific->port        = NET.Client_Port;
 
-    /* Start the clock on this update */
-    UTIL_Stopwatch_Start(&update_sw[time_stamp]);
+ 
 
     /* Sign the message */
     //update->mt_num   = 1;
@@ -419,6 +418,9 @@ void Send_Update(int dummy, void *dummyp)
           dec_ref_cnt(update);
           return;
         }
+
+         /* Start the clock on this update */
+        UTIL_Stopwatch_Start(&update_sw[time_stamp]);
 
 
 
