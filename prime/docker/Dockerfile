@@ -31,7 +31,8 @@ RUN chmod +x stdutil/configure && \
     chmod +x OpenTC-1.1/TC-lib-1.0/missing
 
 WORKDIR /root/cs2910/prime/src
-RUN make
+RUN make clean && make
+# RUN make
 
 # generate prime keys
 WORKDIR /root/cs2910/prime/bin

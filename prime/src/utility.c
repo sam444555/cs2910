@@ -1478,9 +1478,9 @@ void UTIL_Write_Client_Response(signed_message *mess)
 #endif
 
   if(ret <= 0) {
-    // Alarm(PRINT, "Respond to Client failed, ret = %d\n", ret);
-    // Alarm(DEBUG, "Closing and cleaning up connection to client %d\n", 
-	  // machine_id);
+    Alarm(PRINT, "Respond to Client failed, ret = %d\n", ret);
+    Alarm(DEBUG, "Closing and cleaning up connection to client %d\n", 
+	  machine_id);
 #if !USE_IPC_CLIENT
     close(NET.from_client_sd);
     E_detach_fd(NET.from_client_sd, READ_FD);
@@ -1488,12 +1488,12 @@ void UTIL_Write_Client_Response(signed_message *mess)
     NET.to_client_sd = 0;
 #endif
     if (ret == -1) {
-        // if (errno == EWOULDBLOCK)
-        //     Alarm(PRINT, "  EWOULDBLOCK\n");
-        // else if (errno == EAGAIN)
-        //     Alarm(PRINT, "  EAGAIN\n");
-        // else
-        //     Alarm(PRINT, "  EOTHER\n");
+        if (errno == EWOULDBLOCK)
+            Alarm(PRINT, "  EWOULDBLOCK\n");
+        else if (errno == EAGAIN)
+            Alarm(PRINT, "  EAGAIN\n");
+        else
+            Alarm(PRINT, "  EOTHER\n");
             
     }
     /* close(NET.client_sd[machine_id]);
