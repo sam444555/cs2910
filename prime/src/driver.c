@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <float.h>
 #include <netdb.h>
 #include <assert.h>
 #include <signal.h>
@@ -261,15 +262,10 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 
       Alarm(PRINT, "Updates Processed=%d\tExecution Time=%f sec\n",
             response_specific->seq_num, elapsed_sec);
+      fflush(stdout);
   }
-
-
   
   num_outstanding_updates--;
-
-
-
-
   
   /*
       Throughput measurement exit condition: No outstanding updates and all 
@@ -292,13 +288,33 @@ void Process_Message( signed_message *mess, int32u num_bytes )
         Total number of Emulated Clients
         Total updates sent
     */
-    printf("\nThroughput: %.2f updates/sec\n",throughput);
-    printf("Number of Emulated Clients: %u\n",num_clients_to_emulate);
-    printf("Total Updates Sent: %u\n",needed_count);
-    printf("Time elapsed: %.2f seconds\n",time_elapsed);
-    printf("Total failed sends: %u\n",failed_sends);
-    //exit (remove this to get latency information from CLIENT_Cleanup())
-    exit(0);
+    printf("\nThroughput: %.2f updates/sec\n", throughput);
+    printf("Number of Emulated Clients: %u\n", num_clients_to_emulate);
+    printf("Total Updates Sent: %u\n", needed_count);
+    printf("Time elapsed: %.2f seconds\n", time_elapsed);
+    printf("Total failed sends: %u\n", failed_sends);
+    fflush(stdout);
+    
+    //get latencies
+      double min=DBL_MAX,max=0,total=0,avg=0;
+      for(int i=1; i<=time_stamp;i++)
+      {
+        time_elapsed = UTIL_Stopwatch_Elapsed(&update_sw[i]);
+        //update min
+        if(time_elapsed<min) min=time_elapsed;
+        //update max
+        if(time_elapsed>max) max=time_elapsed;
+        //update total
+        total+=time_elapsed;
+      }
+      //get avg latency
+      avg = total/(double)time_stamp;
+      printf("Min Latency: %.6f seconds\n", min);
+      printf("Max Latency: %.6f seconds\n", max);
+      printf("Avg Latency: %.6f seconds\n", avg);
+
+    
+
   }
 
 
