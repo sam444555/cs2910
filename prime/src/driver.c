@@ -251,7 +251,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   if (response_specific->PO_time > Max_PO_Time)
     Max_PO_Time = response_specific->PO_time;
 
-  if(response_specific->seq_num % PRINT_INTERVAL == 0)
+  // if(response_specific->seq_num % PRINT_INTERVAL == 0)
     Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
                     time, response_specific->PO_time);
   
@@ -370,12 +370,11 @@ void Send_Update(int dummy, void *dummyp)
     if (USE_IPC_CLIENT) 
     {
 
-        // ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
-        //             (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
+        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
+                    (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
         
-        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message), 0,
-             (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
-                    /*
+
+          /*
           In high-throughput environments, the driver's socket's send queue will often reach capacity and will reject
           any remaining sends. The original driver code would block the process when this would occur, however there were
           cases when it would block indefinitely. 
@@ -389,7 +388,6 @@ void Send_Update(int dummy, void *dummyp)
         */              
         if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
         {
-
           time_stamp--;
           failed_sends++;
           dec_ref_cnt(update);
@@ -451,7 +449,7 @@ void Send_Update(int dummy, void *dummyp)
 
 
 /*
-  CAN IGNORE/ABSTRACT BELOW FUNCTIONS FOR NOW
+  CAN IGNORE/ABSTRACT OUT BELOW FUNCTIONS FOR NOW
 */
 
 
