@@ -78,9 +78,9 @@ To disable this, in the Windows `.wslconfig` file under the `[wsl2]` section, ad
 kernelCommandLine=hv_utils.timesync_implicit=0
 ```
 
-The `.wslconfig` is typically located in C:\Users\<username>\.wslconfig
+The `.wslconfig` file is typically located at `C:\Users\<username>\.wslconfig`.
 
-After saving the configuration, restart WSL to apply the changes:
+After saving the configuration, restart WSL in PowerShell to apply the changes:
 
 ```powershell
 wsl --shutdown
