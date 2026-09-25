@@ -170,6 +170,9 @@ void clean_exit(int signum)
 
 int main(int argc, char** argv) 
 {
+
+      printf("goodbye!\n");
+    exit(0);
   /* char buf[128]; */
 
   Usage(argc, argv);
