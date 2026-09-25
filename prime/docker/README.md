@@ -72,9 +72,18 @@ resulted in issues with Spines, leading to a significant drop in Prime's overall
 
 The issue was resolved by disabling Hyper-V's implicit time synchronization mechanism within WSL2. 
 
-In the Windows `.wslconfig` file under the `[wsl2]` section, add:
+To disable this, in the Windows `.wslconfig` file under the `[wsl2]` section, add:
 
 ```ini
 kernelCommandLine=hv_utils.timesync_implicit=0
+```
 
+The `.wslconfig` is typically located in C:\Users\<username>\.wslconfig
 
+After saving the configuration, restart WSL to apply the changes:
+
+```powershell
+wsl --shutdown
+```
+
+WSL will automatically restart the next time it is launched.
