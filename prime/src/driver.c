@@ -370,10 +370,12 @@ void Send_Update(int dummy, void *dummyp)
     if (USE_IPC_CLIENT) 
     {
 
-        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
-                    (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
+        // ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
+        //             (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
         
-        /*
+        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message), 0,
+             (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
+                    /*
           In high-throughput environments, the driver's socket's send queue will often reach capacity and will reject
           any remaining sends. The original driver code would block the process when this would occur, however there were
           cases when it would block indefinitely. 
