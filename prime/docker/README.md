@@ -62,7 +62,9 @@ To delete the images, run:
 ```bash
 docker rmi replica-img prime-base
 ```
+# Encountered Bugs & Fixes
 
+## Windows / WSL2 Virtualization Issues
 
 
 
