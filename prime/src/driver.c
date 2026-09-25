@@ -299,7 +299,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
       double min=DBL_MAX,max=0,total=0,avg=0;
       for(int i=1; i<=time_stamp;i++)
       {
-        time_elapsed = UTIL_Stopwatch_Elapsed(&update_sw[i]);
+        time_elapsed = UTIL_Stopwatch_Elapsed(&update_sw[i])*1000.0;
         //update min
         if(time_elapsed<min) min=time_elapsed;
         //update max
@@ -309,10 +309,11 @@ void Process_Message( signed_message *mess, int32u num_bytes )
       }
       //get avg latency
       avg = total/(double)time_stamp;
-      printf("Min Latency: %.6f seconds\n", min);
-      printf("Max Latency: %.6f seconds\n", max);
-      printf("Avg Latency: %.6f seconds\n", avg);
-
+      printf("Min Latency: %.3f ms\n", min);
+      printf("Max Latency: %.3f ms\n", max);
+      printf("Avg Latency: %.3f ms\n", avg);
+      //terminate
+      exit(1);
     
 
   }
