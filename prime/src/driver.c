@@ -254,11 +254,16 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   // if(response_specific->seq_num % PRINT_INTERVAL == 0)
   //   Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
   //                   time, response_specific->PO_time);
-if(response_specific->seq_num % PRINT_INTERVAL == 0)
-    Alarm(PRINT, "Updates Processed=%d\tExecution Time=%f sec\n",
-          response_specific->seq_num,
-          E_sub_time(E_get_time(), throughput_sw.start));
-  
+  if(response_specific->seq_num % PRINT_INTERVAL == 0)
+  {
+      sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
+      double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
+
+      Alarm(PRINT, "Updates Processed=%d\tExecution Time=%f sec\n",
+            response_specific->seq_num, elapsed_sec);
+  }
+
+
   
   num_outstanding_updates--;
 
