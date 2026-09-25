@@ -1463,6 +1463,11 @@ void UTIL_Write_Client_Response(signed_message *mess)
 
   if(machine_id-MAX_NUM_SERVER_SLOTS  == VAR.My_Server_ID)
   {
+
+    Alarm(PRINT, "IPC SEND running: server=%d client=%d\n",
+      VAR.My_Server_ID,
+      machine_id - MAX_NUM_SERVER_SLOTS);
+
     util_stopwatch ipc_send_time;
     UTIL_Stopwatch_Start(&ipc_send_time);
     ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
