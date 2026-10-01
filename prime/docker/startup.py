@@ -1,4 +1,4 @@
-import sys, subprocess, time
+import sys, subprocess, time, os
 
 # replica id 
 id = int(sys.argv[1])
@@ -34,6 +34,20 @@ subprocess.Popen(
     cwd='/root/cs2910/prime/bin',
     shell=True
 )
+
+# # give prime 30 seconds to start
+# time.sleep(30)
+
+# # wait for synchronized driver start
+# while not os.path.exists("/sync/go"):
+#     time.sleep(0.01)
+
+# # start driver
+# subprocess.Popen(
+#     f"./driver -l {ip} -i {id} -s {id} -c 4167 -n 25",
+#     cwd='/root/cs2910/prime/bin',
+#     shell=True
+# )
 
 # wait for spines to terminate then terminate 
 spines.communicate()

@@ -419,7 +419,7 @@ void Send_Update(int dummy, void *dummyp)
           return;
         }
 
-         /* Start the clock on this update */
+         /* Start the clock only on a successful update */
         UTIL_Stopwatch_Start(&update_sw[time_stamp]);
 
 
