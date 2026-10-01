@@ -7,7 +7,7 @@ import sys, subprocess, os
 
 
 if len(sys.argv) != 2:
-    print("Usage: python3 build.py <arg>")
+    print("Usage: python build.py <arg>")
     print("Valid args: base, spines, prime")
     sys.exit(1)
 

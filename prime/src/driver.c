@@ -373,12 +373,26 @@ void Send_Update(int dummy, void *dummyp)
 
   while((num_outstanding_updates < num_clients_to_emulate) && (curr_seq_num<total_required_updates)) 
   {
-    // Create the update
-    update = Build_Update();
 
-    /* Only send an update if a stall has not occurred */
+    // update seqno
+    curr_seq_num++;
+
+    /*
+      An update is only created & sent iff no stalls have been detected. 
+
+      If a stall has been detected, it is assumed that subsequent sends will 
+      also stall & are not performed. In this case, the pipeline becomes "saturated"
+      with the remaining stalled updates & their timers start without actually sending them.
+
+      The state changes made are then rolled back so future Send_Update invocations
+      can retry these sends. 
+
+    */
     if(!stall_detected)
     {
+      // Create the update iff a stall is not detected 
+      update = Build_Update();
+
       /* Attempts to send an update to the replica. Non-blocking (freezes otherwise) */
       ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
                   (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
@@ -396,6 +410,8 @@ void Send_Update(int dummy, void *dummyp)
         // record rollback num outstanding updates
         rollback_outstanding = num_outstanding_updates;
       }
+
+      dec_ref_cnt(update);
     }
 
     /* Start the update's timer (if it has no yet done so)*/
@@ -408,7 +424,6 @@ void Send_Update(int dummy, void *dummyp)
     /* Track stalls */
     if(stall_detected)send_stalls++; 
   
-    dec_ref_cnt(update);
     num_outstanding_updates++;
   }
 
@@ -452,8 +467,6 @@ signed_message* Build_Update(void)
     update->global_configuration_number = my_global_configuration_number;
 
     update_specific = (update_message *)(update + 1);
-
-    curr_seq_num++;
 
     update_specific->server_id = My_Client_ID;
     update->incarnation = my_incarnation;
