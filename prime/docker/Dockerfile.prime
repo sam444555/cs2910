@@ -1,0 +1,22 @@
+FROM spines-base
+
+# Compile prime
+WORKDIR /root/cs2910/prime
+# Make the scripts used executable [Windows/Linux executable permission compatibility issue]
+RUN chmod +x stdutil/configure && \
+    chmod -R +x stdutil/buildtools && \
+    chmod +x libspread-util/configure && \
+    chmod -R +x libspread-util/buildtools && \
+    chmod +x OpenTC-1.1/TC-lib-1.0/configure && \
+    chmod +x OpenTC-1.1/TC-lib-1.0/missing
+
+WORKDIR /root/cs2910/prime/src
+RUN make clean && make
+# RUN make
+
+# generate prime keys
+WORKDIR /root/cs2910/prime/bin
+RUN ./gen_keys
+
+
+
