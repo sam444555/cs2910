@@ -78,10 +78,7 @@
 */
 
 /* Adjust this to configure how often a client prints. */
-/*#define PRINT_INTERVAL NUM_CLIENTS_TO_EMULATE*/
-// #define PRINT_INTERVAL 10
 #define PRINT_INTERVAL 1000
-
 
 /* This sets the maximum number of updates a client can submit */
 #define MAX_ACTIONS 100000 
@@ -109,6 +106,7 @@ void CLIENT_Cleanup(void);
 int32u Validate_Message( signed_message *mess, int32u num_bytes ); 
 double Compute_Average_Latency(void);
 void clean_exit(int signum);
+signed_message* Build_Update(void);
 
 /* Client Variables */
 extern network_variables NET;
@@ -120,9 +118,9 @@ int32u My_Server_Alive;
 int32u my_global_configuration_number;
 int32u my_incarnation;
 int32u update_count;
-int32u needed_count;
+int32u total_required_updates;
 double total_time;
-int32u time_stamp;
+int32u curr_seq_num;
 int ca_driver;
 struct ip_mreq mreq;
 sp_time t;
@@ -138,7 +136,10 @@ int32u send_to_server;
 int32u last_executed = 0;
 int32u executed[MAX_ACTIONS];
 int sd[MAX_NUM_SERVER_SLOTS];
+
+
 util_stopwatch update_sw[MAX_ACTIONS];
+u_int32_t highest_timer_started = 0;
 
 util_stopwatch sw;  // unused?
 util_stopwatch latency_sw;
@@ -153,8 +154,8 @@ struct sockaddr_un Conn;
 /* Variables added for throughput testing */
 
 //Tracks the number of failed sends to the prime server due to high-throughput/high-load environments. 
-int32u failed_sends = 0;
-//Used to measure start --> stop time
+int32u send_stalls = 0;
+//Used to measure start --> stop time for throughput measurement 
 util_stopwatch throughput_sw;
 //Number of clients the driver emulates, now passed as a command-line argument using the -c flag. 
 int32u num_clients_to_emulate = 1;
@@ -182,7 +183,7 @@ int main(int argc, char** argv)
 
   NET.program_type = NET_CLIENT_PROGRAM_TYPE;  
   update_count     = 0;
-  time_stamp       = 0;
+  curr_seq_num       = 0;
   total_time       = 0;
   //MS2022
 
@@ -273,15 +274,15 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 
       TODO: make this a function for readability
   */
-  if(num_outstanding_updates==0 && time_stamp==needed_count)
+  if(num_outstanding_updates==0 && curr_seq_num==total_required_updates)
   {
     //stop timer
     UTIL_Stopwatch_Stop(&throughput_sw);
     //time elapsed [since first update sent to the final one]
     double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
     //calc throughput = completed requests/elapsed time 
-    // where completed requests = needed_count (input num of requests)
-    double throughput = (double)needed_count/time_elapsed;
+    // where completed requests = total_required_updates (input num of requests)
+    double throughput = (double)total_required_updates/time_elapsed;
     //print results:
     /*
         Throughput in updates/sec
@@ -290,14 +291,14 @@ void Process_Message( signed_message *mess, int32u num_bytes )
     */
     printf("\nThroughput: %.2f updates/sec\n", throughput);
     printf("Number of Emulated Clients: %u\n", num_clients_to_emulate);
-    printf("Total Updates Sent: %u\n", needed_count);
+    printf("Total Updates Sent: %u\n", total_required_updates);
     printf("Time elapsed: %.2f seconds\n", time_elapsed);
-    printf("Total failed sends: %u\n", failed_sends);
+    printf("Total failed sends: %u\n", send_stalls);
     fflush(stdout);
     
     //get latencies
       double min=DBL_MAX,max=0,total=0,avg=0;
-      for(int i=1; i<=time_stamp;i++)
+      for(int i=1; i<=curr_seq_num;i++)
       {
         time_elapsed = UTIL_Stopwatch_Elapsed(&update_sw[i])*1000.0;
         //update min
@@ -308,7 +309,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
         total+=time_elapsed;
       }
       //get avg latency
-      avg = total/(double)time_stamp;
+      avg = total/(double)curr_seq_num;
       printf("Min Latency: %.3f ms\n", min);
       printf("Max Latency: %.3f ms\n", max);
       printf("Avg Latency: %.3f ms\n", avg);
@@ -319,7 +320,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   }
 
 
-  if(time_stamp<needed_count)
+  if(curr_seq_num<total_required_updates)
   {
   	Send_Update(0, NULL);
   }
@@ -346,130 +347,84 @@ void Run_Client()
   */
   UTIL_Stopwatch_Start(&throughput_sw);
 
-  if(time_stamp<needed_count)
+  if(curr_seq_num<total_required_updates)
   {
   	Send_Update(0, NULL);
   }
 
 }
 
+/*
+  Sends an update to the prime replica. Only IPC (inter-process communication) is currently supported. 
+  
+  TCP-based sending has been removed for function readability. 
+  TODO: restore TCP sending support
+*/
 void Send_Update(int dummy, void *dummyp)
 {
   signed_message *update;
-  update_message *update_specific;
   int ret;
 
-  while((num_outstanding_updates < num_clients_to_emulate) && (time_stamp<needed_count)) 
+  // detects if a sending stall has occurred
+  u_int8_t stall_detected = 0;
+  // tracks the seqno of the first stalled update for rollback purposes
+  u_int32_t rollback_seqno;
+  // tracks the num_outstanding on the first stalled update for rollback purposes
+  u_int32_t rollback_outstanding;
+
+  while((num_outstanding_updates < num_clients_to_emulate) && (curr_seq_num<total_required_updates)) 
   {
+    // Create the update
+    update = Build_Update();
 
-    /* Build a new update */
-    update             = UTIL_New_Signed_Message();
-    update->machine_id = My_Client_ID;
-    update->len        = sizeof(update_message) + UPDATE_SIZE;
-    update->type       = UPDATE;
-    update->global_configuration_number =my_global_configuration_number;
-
-    update_specific = (update_message*)(update+1);
-
-    time_stamp++; 
-    //update_specific->server_id   = send_to_server;
-    update_specific->server_id   = My_Client_ID;
-    update->incarnation          = my_incarnation;
-    update_specific->seq_num     = time_stamp; 
-    update_specific->address     = NET.My_Address;
-    update_specific->port        = NET.Client_Port;
-
- 
-
-    /* Sign the message */
-    //update->mt_num   = 1;
-    //update->mt_index = 1;
-
-    if(CLIENTS_SIGN_UPDATES)
-      UTIL_RSA_Sign_Message(update);
-
-    Alarm(DEBUG, "%d Sent %d to server %d\n", 
-	  My_Client_ID, time_stamp, send_to_server);
-    
-    //IPC = inter-process communication
-    if (USE_IPC_CLIENT) 
+    /* Only send an update if a stall has not occurred */
+    if(!stall_detected)
     {
-
-        ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
-                    (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
-        
-
-          /*
-          In high-throughput environments, the driver's socket's send queue will often reach capacity and will reject
-          any remaining sends. The original driver code would block the process when this would occur, however there were
-          cases when it would block indefinitely. 
-          
-          I am still not 100% sure why this is occurring. Making it non-blocking seems to have fixed it for the most part, 
-          but there are still cases when the driver deadlocks & the program comes to a standstill. This could be due to an 
-          unintended logic error or how prime handles its IPC socket. 
-          
-          Possible fixes could include lowering the number of outstanding updates or 
-          increasing the size of the send buffer.
-        */              
-        if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
-        {
-          time_stamp--;
-          failed_sends++;
-          dec_ref_cnt(update);
-          return;
-        }
-
-         /* Start the clock only on a successful update */
-        UTIL_Stopwatch_Start(&update_sw[time_stamp]);
-
-
-
+      /* Attempts to send an update to the replica. Non-blocking (freezes otherwise) */
+      ret = sendto(sd[send_to_server], update, sizeof(signed_update_message),MSG_DONTWAIT,
+                  (struct sockaddr *)&Conn, sizeof(struct sockaddr_un));
+      /*
+          A stall has occurred. Update bookkeeping info. All subsequent sends
+          assume failure (i.e. send is not called). However, pipeline space remains,
+          therefore their timers are started as if the updates had been sent
+      */
+      if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
+      {
+        // update stall tracker
+        stall_detected=1;
+        // record rollback seqno
+        rollback_seqno=curr_seq_num-1;
+        // record rollback num outstanding updates
+        rollback_outstanding = num_outstanding_updates;
+      }
     }
 
-    else 
+    /* Start the update's timer (if it has no yet done so)*/
+    if(curr_seq_num>highest_timer_started)
     {
-        ret = NET_Write(sd[send_to_server], update, sizeof(signed_update_message));
+      UTIL_Stopwatch_Start(&update_sw[curr_seq_num]);
+      highest_timer_started=curr_seq_num;
     }
-
-    if(ret <= 0) {
-      perror("sendto prime");
-      fflush(stdout);
-      close(sd[send_to_server]);
-      E_detach_fd(sd[send_to_server], READ_FD);
-      CLIENT_Cleanup();
-    }
-    
+      
+    /* Track stalls */
+    if(stall_detected)send_stalls++; 
+  
     dec_ref_cnt(update);
-
-    /*
-        If no specific server is selected (which gets passed into the command line)
-        this code executes and sends the update to a random server. 
-    */
-
-    /* If we're rotating across all servers, send the next one to the 
-     * next server modulo the total number of servers. */
-//     if(My_Server_ID == 0) 
-//     {
-
-// #if 0
-//       send_to_server++;
-//       send_to_server = send_to_server % (NUM_SERVERS);
-// #endif
-//       send_to_server = rand() % MAX_NUM_SERVERS;
-//       if(send_to_server == 0)
-//         send_to_server = MAX_NUM_SERVERS;
-//     }
-
     num_outstanding_updates++;
   }
+
+  /*
+    A stall has occurred. Rollback the number of outstanding updates and the sequence
+    number so subsequent Send_Update calls can correctly re-attempt sends from where 
+    the first stall occurred.
+  */
+  if(stall_detected)
+  {
+    num_outstanding_updates = rollback_outstanding;
+    curr_seq_num = rollback_seqno;
+  }
+
 }
-
-
-
-
-
-
-
 
 
 
@@ -480,6 +435,40 @@ void Send_Update(int dummy, void *dummyp)
   CAN IGNORE/ABSTRACT OUT BELOW FUNCTIONS FOR NOW
 */
 
+/* 
+  Creates the update sent to the Prime replica in Send_Update(...) 
+
+  Extracted from Send_Update() for readability. 
+*/
+signed_message* Build_Update(void)
+{
+    signed_message *update;
+    update_message *update_specific;
+
+    update = UTIL_New_Signed_Message();
+
+    update->machine_id = My_Client_ID;
+    update->len = sizeof(update_message) + UPDATE_SIZE;
+    update->type = UPDATE;
+    update->global_configuration_number = my_global_configuration_number;
+
+    update_specific = (update_message *)(update + 1);
+
+    curr_seq_num++;
+
+    update_specific->server_id = My_Client_ID;
+    update->incarnation = my_incarnation;
+    update_specific->seq_num = curr_seq_num;
+    update_specific->address = NET.My_Address;
+    update_specific->port = NET.Client_Port;
+
+    if(CLIENTS_SIGN_UPDATES)
+    {
+        UTIL_RSA_Sign_Message(update);
+    }
+
+    return update;
+}
 
 
 void Init_Memory_Objects(void)
@@ -536,7 +525,7 @@ void Usage(int argc, char **argv)
   /* [-c count] */
     else if((argc > 1)&&(!strncmp(*argv, "-c", 2))) {
       sscanf(argv[1], "%d", &tmp);
-      needed_count = tmp;
+      total_required_updates = tmp;
       argc--; argv++;
     } 
   /* [-n number of clients to emulate]*/
@@ -570,14 +559,16 @@ void Usage(int argc, char **argv)
   srand(My_Client_ID);
 }
 
-// TODO: update for num emulate clients change 
 void Print_Usage()
 {
   Alarm(PRINT, "Usage: ./client\n"
 	"\t -l IP (A.B.C.D) \n"
 	"\t -c count_of_transactions_to_benchmark \n"
         "\t -i client_id, indexed base 1\n"
-	"\t[-s server_id, indexed base 1]\n");
+	"\t[-s server_id, indexed base 1]\n"
+" \t[-c num_cliens_to_emulate]\n"
+);
+
 
   exit(0);
 }
@@ -750,7 +741,7 @@ int32u Validate_Message( signed_message *mess, int32u num_bytes )
   app = (signed_message *) (r+1);
   if(r->machine_id != My_Client_ID) {
     if(app->type==CLIENT_SYSTEM_RECONF && mess->global_configuration_number==my_global_configuration_number){
-  	if(time_stamp<needed_count && My_Server_Alive==1){
+  	if(curr_seq_num<total_required_updates && My_Server_Alive==1){
         	Alarm(DEBUG, "Received System RECONF from my Prime. So, will resume benchmarks\n");
 		t.sec=10;
 		t.usec=0;
@@ -806,7 +797,7 @@ void CLIENT_Cleanup()
   fflush(stdout);
 
   printf("Latencies for first 10 packets\n");
-  for (i = 0, count = 1; count <= 10 && i < time_stamp; i++)
+  for (i = 0, count = 1; count <= 10 && i < curr_seq_num; i++)
   {
     if (executed[i]) {
         printf("Pkt %u latency: %f\n", count, Latencies[i]);
@@ -815,7 +806,7 @@ void CLIENT_Cleanup()
   }
 
   printf("Latency histogram\n");
-  for(i = 0; i < time_stamp; i++) {
+  for(i = 0; i < curr_seq_num; i++) {
     if(executed[i]) {
       sum += Latencies[i];
       num_executed++;
@@ -851,15 +842,15 @@ double Compute_Average_Latency()
   int32u i;
   double sum = 0.0;
 
-  Alarm(DEBUG, "Action count in Compute(): %d\n", time_stamp);
+  Alarm(DEBUG, "Action count in Compute(): %d\n", curr_seq_num);
 
-  for(i = 1; i < time_stamp; i++) {
+  for(i = 1; i < curr_seq_num; i++) {
     if(Latencies[i] > 0.004) {
       Alarm(DEBUG, "High latency for update %d: %f\n", i, Latencies[i]);
     }
 
 
-  return (sum / (double)(time_stamp-1));
+  return (sum / (double)(curr_seq_num-1));
   }
 }
 
@@ -929,10 +920,11 @@ void Config_Recv(channel sk, int dummy, void *dummy_p){
 	My_Server_Alive=1;
    } 
   OPENSSL_RSA_Read_Keys( My_Client_ID, RSA_CLIENT,"/tmp/test_keys/prime" );
-  time_stamp=0;
+  curr_seq_num=0;
   num_outstanding_updates = 0;
   }
 }
+
   
 
 /***********************************************************/
