@@ -342,9 +342,8 @@ void Run_Client()
     send_to_server = My_Server_ID;
   else
     send_to_server = 1;
-  /*
-    Time begins for throughput testing
-  */
+  
+  /* Timer for throughput testing begins here */
   UTIL_Stopwatch_Start(&throughput_sw);
 
   if(curr_seq_num<total_required_updates)
@@ -355,9 +354,9 @@ void Run_Client()
 }
 
 /*
-  Sends an update to the prime replica. Only IPC (inter-process communication) is currently supported. 
+  Sends an update to the prime replica daemon. Only IPC (inter-process communication) is currently supported. 
   
-  TCP-based sending has been removed for function readability. 
+  TCP-based sending has been removed for readability. 
   TODO: restore TCP sending support
 */
 void Send_Update(int dummy, void *dummyp)
