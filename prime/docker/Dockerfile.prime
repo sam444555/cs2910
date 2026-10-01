@@ -1,5 +1,10 @@
 FROM spines-base
 
+# the spines img clones the repo, get the most up to date version since
+# we will ideally only rebuild the img when we change spines 
+WORKDIR /root/cs2910
+RUN git pull
+
 # Compile prime
 WORKDIR /root/cs2910/prime
 # Make the scripts used executable [Windows/Linux executable permission compatibility issue]
