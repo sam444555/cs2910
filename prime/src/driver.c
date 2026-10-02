@@ -388,10 +388,6 @@ void Send_Update(int dummy, void *dummyp)
   signed_message *update;
   int ret;
 
-  printf("\nEntering SEND_UPDATE: seq=%u outstanding=%u\n",
-       curr_seq_num, num_outstanding_updates);
-fflush(stdout);
-
   // detects if a sending stall has occurred
   u_int8_t stall_detected = 0;
   // tracks the seqno of the first stalled update for rollback purposes
@@ -481,11 +477,6 @@ fflush(stdout);
   {
     // E_detach_fd(sd[My_Server_ID], WRITE_FD);
   }
-
-  
-puts("Leaving Send_Update\n");
-fflush(stdout);
-
 
 }
 
