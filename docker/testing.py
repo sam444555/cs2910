@@ -1,6 +1,6 @@
 import sys, subprocess, time, os
 
-total_updates=50000
+total_updates=25000
 
 # create the results file in csv format
 # limit,clients,trial#,time_sec,stalls,expected_throughput,actual_throughput,min_latency,max_latency,avg_latency
