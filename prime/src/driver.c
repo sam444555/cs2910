@@ -371,6 +371,8 @@ void Run_Client()
 */
 void Send_Update(int dummy, void *dummyp)
 {
+
+  printf("WRITE callback\n");
   signed_message *update;
   int ret;
 
@@ -934,6 +936,8 @@ void Config_Recv(channel sk, int dummy, void *dummy_p){
 
 void Net_Cli_Recv(channel sk, int dummy, void *dummy_p) 
 {
+
+  printf("READ callback\n");
   int32  received_bytes;
   int32u expected_total_size = 0, remaining_bytes;
   int    ret;
