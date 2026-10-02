@@ -264,6 +264,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 
       printf("Updates Processed=%d\tExecution Time=%f sec\n",
             response_specific->seq_num, elapsed_sec);
+      puts("this is a test...");
       fflush(stdout);
   }
   
