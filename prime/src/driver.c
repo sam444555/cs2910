@@ -327,8 +327,8 @@ void Print_And_Exit(void)
         Total updates sent
     */
     printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", num_clients_to_emulate, total_required_updates);
-    printf("Total time elapsed (seconds):\t\t %.2f\n", time_elapsed);
-    printf("Total stalled sends:\t\t %u\n", send_stalls);
+    printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
+    printf("Total stalled sends:\t\t\t %u\n", send_stalls);
     printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
     printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
     printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
@@ -441,11 +441,23 @@ void Send_Update(int dummy, void *dummyp)
     A stall has occurred. Rollback the number of outstanding updates and the sequence
     number so subsequent Send_Update calls can correctly re-attempt sends from where 
     the first stall occurred.
+    
+    Register the socket with the main event system (spines/libspread-util/src/events.c)
+    to call Send_Update when it becomes writable. 
   */
   if(stall_detected)
   {
     num_outstanding_updates = rollback_outstanding;
     curr_seq_num = rollback_seqno;
+    E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, MEDIUM_PRIORITY);
+  }
+  /*
+    No stall has occurred. Detach/stop monitoring WRITE_FD to 
+    prevent unnecessary calls. 
+  */
+  else
+  {
+    E_detach_fd(sd[My_Server_ID], WRITE_FD);
   }
 
 }
@@ -625,14 +637,10 @@ void Init_Client_Network(void)
   if(srv_recv_scat.elements[0].buf == NULL)
     Alarm(EXIT, "Init_Client_Network: Cannot allocate packet object\n");
   
-  /* ses_recv_scat.num_elements    = 1;
-  ses_recv_scat.elements[0].len = sizeof(packet);
-  ses_recv_scat.elements[0].buf = (char *) new_ref_cnt(PACK_BODY_OBJ);
-  if(ses_recv_scat.elements[0].buf == NULL)
-    Alarm(EXIT, "Init_Client_Network: Cannot allocate packet object\n"); */
- 
+
   /* Initialize IPC socket, single one in this case */
-  if (USE_IPC_CLIENT) {
+  if (USE_IPC_CLIENT) 
+  {
    Alarm(DEBUG,"Using IPC Client \n");
     if (My_Server_ID == 0) {
         Alarm(PRINT, "My_Server_ID is 0, must set ID to use IPC\n");
@@ -661,62 +669,18 @@ void Init_Client_Network(void)
     Conn.sun_family = AF_UNIX;
     sprintf(Conn.sun_path, "%s%d", (char *)REPLICA_IPC_PATH, My_Server_ID);
 
-    /* if((connect(sd[My_Server_ID], (struct sockaddr *)&Conn, sizeof(Conn))) < 0) {
-      perror("connect");
-      Alarm(PRINT, "Client %d could not connect to server %d\n", 
-          My_Client_ID, My_Server_ID);
-      fflush(stdout);
-      exit(0);
-    } */
+
     Alarm(PRINT, "Client %d ready to send to server %d\n", My_Client_ID, My_Server_ID);
 
     /* Register the socket descriptor with the event system */
     E_attach_fd(sd[My_Server_ID], READ_FD, Net_Cli_Recv, 0, NULL, MEDIUM_PRIORITY);
 
+  
     /* Maximize the size of the socket buffers */
     max_rcv_buff(sd[My_Server_ID]);
     max_snd_buff(sd[My_Server_ID]);
   }
-  /* Initialize the TCP sockets, one per server in my site */
-  else {
-    for(i = 1; i <= MAX_NUM_SERVERS; i++) {
 
-      /* If we're sending to a particular server, set up a connection
-       * with that server only. */
-      if(My_Server_ID != 0 && i != My_Server_ID)
-        continue;
-
-      if((sd[i] = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("socket");
-        fflush(stdout);
-        exit(0);
-      }
-
-      assert(sd[i] != fileno(stderr));
-
-      memset(&server_addr, 0, sizeof(server_addr));
-      server_addr.sin_family      = AF_INET;
-      server_addr.sin_port        = htons(PRIME_TCP_BASE_PORT + i);
-      server_addr.sin_addr.s_addr = htonl(UTIL_Get_Server_Address(i));
-        
-      if((connect(sd[i], (struct sockaddr *)&server_addr, 
-          sizeof(server_addr))) < 0) {
-        perror("connect");
-        Alarm(PRINT, "Client %d could not connect to server server %d\n", 
-          My_Client_ID, i);
-        fflush(stdout);
-        exit(0);
-      }
-      Alarm(PRINT, "Client %d connected to server %d\n", My_Client_ID, i);
-
-      /* Register the socket descriptor with the event system */
-      E_attach_fd(sd[i], READ_FD, Net_Cli_Recv, 0, NULL, MEDIUM_PRIORITY);
-
-      /* Maximize the size of the socket buffers */
-      max_rcv_buff(sd[i]);
-      max_snd_buff(sd[i]);
-    }
-  }
   /*CA Driver IPC path*/
     ca_driver = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (ca_driver < 0) {
