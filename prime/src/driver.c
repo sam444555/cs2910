@@ -371,10 +371,6 @@ void Run_Client()
 */
 void Send_Update(int dummy, void *dummyp)
 {
-
-  printf("WRITE callback | outstanding=%u | seq=%u\n",
-       num_outstanding_updates, curr_seq_num);
-
   signed_message *update;
   int ret;
 
@@ -417,6 +413,8 @@ void Send_Update(int dummy, void *dummyp)
       */
       if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
       {
+            printf("EAGAIN | outstanding=%u | seq=%u\n",
+           num_outstanding_updates, curr_seq_num);
         // update stall tracker
         stall_detected=1;
         // record rollback seqno
