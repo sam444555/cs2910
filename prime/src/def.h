@@ -97,7 +97,7 @@
 /* Number of outstanding PO_requests that have not yet been executed */
 // #define MAX_PO_IN_FLIGHT 20 ~1047
 // #define MAX_PO_IN_FLIGHT 50 ~1242
-#define MAX_PO_IN_FLIGHT 75 ~1242
+#define MAX_PO_IN_FLIGHT 75 
 
 
 
