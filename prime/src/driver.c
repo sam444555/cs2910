@@ -267,7 +267,9 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   //     fflush(stdout);
   // }
 
-  
+    num_outstanding_updates--;
+
+
     sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
     double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
@@ -281,7 +283,6 @@ void Process_Message( signed_message *mess, int32u num_bytes )
     fflush(stdout);
 
   
-  num_outstanding_updates--;
   
   /*
       Throughput measurement exit condition: No outstanding updates and all 

@@ -1688,6 +1688,12 @@ void ORDER_Execute_Commit(ord_slot *o_slot)
         if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num == MAX_PO_IN_FLIGHT) {
           Alarm(DEBUG, "Execute: Reattaching client sd\n");
 #if USE_IPC_CLIENT
+
+Alarm(PRINT,
+      "REATTACH: po_seq=%u executed=%u diff=%u\n",
+      DATA.PO.po_seq.seq_num,
+      DATA.PO.po_seq_executed.seq_num,
+      DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num);
           E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, IPC_SOURCE, NULL, MEDIUM_PRIORITY);
 #else
           E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, TCP_SOURCE, NULL, MEDIUM_PRIORITY);
