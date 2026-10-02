@@ -435,6 +435,14 @@ void Send_Update(int dummy, void *dummyp)
         rollback_outstanding = num_outstanding_updates;
       }
 
+      if(ret == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
+      {
+          printf("UNEXPECTED SEND FAILURE: seq=%u errno=%d (%s)\n",
+                curr_seq_num, errno, strerror(errno));
+          fflush(stdout);
+          exit(1);
+      }
+
       dec_ref_cnt(update);
     }
 
