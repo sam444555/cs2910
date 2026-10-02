@@ -264,7 +264,6 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 
       printf("Updates Processed=%d\tExecution Time=%f sec\n",
             response_specific->seq_num, elapsed_sec);
-      puts("this is a test...");
       fflush(stdout);
   }
   
@@ -450,7 +449,9 @@ void Send_Update(int dummy, void *dummyp)
   {
     num_outstanding_updates = rollback_outstanding;
     curr_seq_num = rollback_seqno;
-    E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, MEDIUM_PRIORITY);
+    E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, HIGH_PRIORITY);
+    // E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, MEDIUM_PRIORITY);
+
   }
   /*
     No stall has occurred. Detach/stop monitoring WRITE_FD to 
