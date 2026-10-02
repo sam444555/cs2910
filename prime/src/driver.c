@@ -107,6 +107,7 @@ int32u Validate_Message( signed_message *mess, int32u num_bytes );
 double Compute_Average_Latency(void);
 void clean_exit(int signum);
 signed_message* Build_Update(void);
+void Print_And_Exit(void);
 
 /* Client Variables */
 extern network_variables NET;
@@ -272,52 +273,10 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   /*
       Throughput measurement exit condition: No outstanding updates and all 
       client requested updates have been delivered
-
-      TODO: make this a function for readability
   */
   if(num_outstanding_updates==0 && curr_seq_num==total_required_updates)
   {
-    //stop timer
-    UTIL_Stopwatch_Stop(&throughput_sw);
-    //time elapsed [since first update sent to the final one]
-    double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
-    //calc throughput = completed requests/elapsed time 
-    // where completed requests = total_required_updates (input num of requests)
-    double throughput = (double)total_required_updates/time_elapsed;
-    //print results:
-    /*
-        Throughput in updates/sec
-        Total number of Emulated Clients
-        Total updates sent
-    */
-    printf("\nThroughput: %.2f updates/sec\n", throughput);
-    printf("Number of Emulated Clients: %u\n", num_clients_to_emulate);
-    printf("Total Updates Sent: %u\n", total_required_updates);
-    printf("Time elapsed: %.2f seconds\n", time_elapsed);
-    printf("Total failed sends: %u\n", send_stalls);
-    fflush(stdout);
-    
-    //get latencies
-      double min=DBL_MAX,max=0,total=0,avg=0;
-      for(int i=1; i<=curr_seq_num;i++)
-      {
-        time_elapsed = UTIL_Stopwatch_Elapsed(&update_sw[i])*1000.0;
-        //update min
-        if(time_elapsed<min) min=time_elapsed;
-        //update max
-        if(time_elapsed>max) max=time_elapsed;
-        //update total
-        total+=time_elapsed;
-      }
-      //get avg latency
-      avg = total/(double)curr_seq_num;
-      printf("Min Latency: %.3f ms\n", min);
-      printf("Max Latency: %.3f ms\n", max);
-      printf("Avg Latency: %.3f ms\n", avg);
-      //terminate
-      exit(1);
-    
-
+    Print_And_Exit();
   }
 
 
@@ -327,6 +286,58 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   }
   return;
 }
+
+/* Prints the results of the test and exits the driver program */
+void Print_And_Exit(void)
+{
+    //stop timer [throughput measurement]
+    UTIL_Stopwatch_Stop(&throughput_sw);
+
+  
+
+    //time elapsed [since first update sent to the final update being successfully being received]
+    double time_elapsed = UTIL_Stopwatch_Elapsed(&throughput_sw);
+
+    //get latencies
+    double min=DBL_MAX,max=0,total=0,avg=0, latency=0;
+    for(int i=1; i<=curr_seq_num;i++)
+    {
+      latency = UTIL_Stopwatch_Elapsed(&update_sw[i])*1000.0;
+      //update min
+      if(latency<min) min=latency;
+      //update max
+      if(latency>max) max=latency;
+      //update total
+      total+=latency;
+    }
+    //get avg latency
+    avg = total/(double)curr_seq_num;
+
+  
+    /* calculate actual throughput = total_required_updates / elapsed time */
+    double actual_throughput = (double)total_required_updates/time_elapsed;
+    /* calculate expected throughput = (1000/Avg Latency(ms)) * num_clients_to_emulate */
+    double expected_throughput = (1000/avg)* num_clients_to_emulate;
+
+    /*
+      Print test results:
+        Number of Emulated Clients c with
+        Total Updates sent 
+        Throughput in updates/sec
+        Total number of Emulated Clients
+        Total updates sent
+    */
+    printf("\n*** Test Results ***\n");
+    printf("\tNumber of Emulated Clients: %u | Total Updates: %u\n", num_clients_to_emulate,total_required_updates);
+    printf("\tTotal time elapsed: %.2f seconds\n", time_elapsed);
+    printf("Total stalled sends: %u\n", send_stalls);
+    printf("\t Expected throughput: %.2f updates/sec\n", expected_throughput);
+    printf("\t Actual throughput: %.2f updates/sec\n", actual_throughput);
+    printf("Min/Max/Avg Latency (ms): %.3f / %.3f / %.3f \n", min,max,avg);
+    exit(1);
+
+}
+
 
 void Run_Client()
 {
