@@ -372,7 +372,9 @@ void Run_Client()
 void Send_Update(int dummy, void *dummyp)
 {
 
-  printf("WRITE callback\n");
+  printf("WRITE callback | outstanding=%u | seq=%u\n",
+       num_outstanding_updates, curr_seq_num);
+
   signed_message *update;
   int ret;
 
