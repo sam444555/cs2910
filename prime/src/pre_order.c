@@ -248,7 +248,8 @@ void PRE_ORDER_Send_PO_Request()
 
     /* Check if we reached the MAX number PO requests in flight, and if so
      * stop reading in new client requests */
-    if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num >= MAX_PO_IN_FLIGHT) {
+    if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num >= MAX_PO_IN_FLIGHT) 
+    {
         E_detach_fd(NET.from_client_sd, READ_FD);
         Alarm(DEBUG, "Detaching client fd\n");
         break;
