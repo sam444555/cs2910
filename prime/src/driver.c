@@ -257,30 +257,30 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   // if(response_specific->seq_num % PRINT_INTERVAL == 0)
   //   Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
   //                   time, response_specific->PO_time);
-  // if(response_specific->seq_num % PRINT_INTERVAL == 0)
-  // {
-  //     sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
-  //     double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
+  if(response_specific->seq_num % PRINT_INTERVAL == 0)
+  {
+      sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
+      double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-  //     printf("Updates Processed=%d\tExecution Time=%f sec\n",
-  //           response_specific->seq_num, elapsed_sec);
-  //     fflush(stdout);
-  // }
+      printf("Updates Processed=%d\tExecution Time=%f sec\n",
+            response_specific->seq_num, elapsed_sec);
+      fflush(stdout);
+  }
 
     num_outstanding_updates--;
 
 
-    sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
-    double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
+    // sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
+    // double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-    printf("RESPONSE: seq=%u | curr_seq=%u | outstanding=%u | "
-           "time=%.6f sec\n",
-           response_specific->seq_num,
-           curr_seq_num,
-           num_outstanding_updates,
-           elapsed_sec);
+    // printf("RESPONSE: seq=%u | curr_seq=%u | outstanding=%u | "
+    //        "time=%.6f sec\n",
+    //        response_specific->seq_num,
+    //        curr_seq_num,
+    //        num_outstanding_updates,
+    //        elapsed_sec);
 
-    fflush(stdout);
+    // fflush(stdout);
 
   
   
@@ -343,24 +343,24 @@ void Print_And_Exit(void)
     */
 
     // HUMAN VERSION
-    // printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", num_clients_to_emulate, total_required_updates);
-    // printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
-    // printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
-    // printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
-    // printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
-    // printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
+    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", num_clients_to_emulate, total_required_updates);
+    printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
+    printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
+    printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
+    printf("Actual throughput (updates/sec):\t\t %.2f\n", actual_throughput);
+    printf("Min/Max/Avg Latency (milliseconds):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
 
     // CSV VERSION 
-    printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f\n",
-       num_clients_to_emulate,
-       total_required_updates,
-       time_elapsed,
-       send_stalls,
-       expected_throughput,
-       actual_throughput,
-       min,
-       max,
-       avg);
+    // printf("RESULT,%u,%u,%.2f,%u,%.2f,%.2f,%.3f,%.3f,%.3f\n",
+    //    num_clients_to_emulate,
+    //    total_required_updates,
+    //    time_elapsed,
+    //    send_stalls,
+    //    expected_throughput,
+    //    actual_throughput,
+    //    min,
+    //    max,
+    //    avg);
     exit(1);
 
 }
