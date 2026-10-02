@@ -327,13 +327,12 @@ void Print_And_Exit(void)
         Total number of Emulated Clients
         Total updates sent
     */
-    printf("\n*** Test Results ***\n");
-    printf("\tNumber of Emulated Clients: %u | Total Updates: %u\n", num_clients_to_emulate,total_required_updates);
-    printf("\tTotal time elapsed: %.2f seconds\n", time_elapsed);
+    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", num_clients_to_emulate, total_required_updates);
+    printf("Total time elapsed: %.2f seconds\n", time_elapsed);
     printf("Total stalled sends: %u\n", send_stalls);
-    printf("\t Expected throughput: %.2f updates/sec\n", expected_throughput);
-    printf("\t Actual throughput: %.2f updates/sec\n", actual_throughput);
-    printf("Min/Max/Avg Latency (ms): %.3f / %.3f / %.3f \n", min,max,avg);
+    printf("Expected throughput: %.2f updates/sec\n", expected_throughput);
+    printf("Actual throughput: %.2f updates/sec\n", actual_throughput);
+    printf("Min/Max/Avg Latency (ms): %.3f / %.3f / %.3f \n\n", min,max,avg);
     exit(1);
 
 }
