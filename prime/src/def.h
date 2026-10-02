@@ -95,9 +95,9 @@
 #define CATCHUP_HISTORY 10
 
 /* Number of outstanding PO_requests that have not yet been executed */
-#define MAX_PO_IN_FLIGHT 20 
+// #define MAX_PO_IN_FLIGHT 20 
 // #define MAX_PO_IN_FLIGHT 50 ~1242
-// #define MAX_PO_IN_FLIGHT 75 
+#define MAX_PO_IN_FLIGHT 75 
 // #define MAX_PO_IN_FLIGHT 20 ~1047
 
 
