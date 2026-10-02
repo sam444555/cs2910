@@ -413,8 +413,6 @@ void Send_Update(int dummy, void *dummyp)
       */
       if(ret==-1 && (errno==EAGAIN || errno==EWOULDBLOCK))
       {
-            printf("EAGAIN | outstanding=%u | seq=%u\n",
-           num_outstanding_updates, curr_seq_num);
         // update stall tracker
         stall_detected=1;
         // record rollback seqno
@@ -451,8 +449,10 @@ void Send_Update(int dummy, void *dummyp)
   {
     num_outstanding_updates = rollback_outstanding;
     curr_seq_num = rollback_seqno;
-    E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, HIGH_PRIORITY);
-    // E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, MEDIUM_PRIORITY);
+    // E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, HIGH_PRIORITY); // results in freeze
+    // E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, MEDIUM_PRIORITY); // no change in throughput
+    E_attach_fd(sd[My_Server_ID], WRITE_FD, Send_Update, 0, NULL, LOW_PRIORITY); // ???
+
 
   }
   /*
