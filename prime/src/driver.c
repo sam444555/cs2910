@@ -262,9 +262,8 @@ void Process_Message( signed_message *mess, int32u num_bytes )
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-      printf("Updates Processed=%d\tExecution Time=%f sec\n",
+      printf("\nUpdates Processed=%d\tExecution Time=%f sec\n",
             response_specific->seq_num, elapsed_sec);
-      puts("this is a test");
       fflush(stdout);
   }
   
@@ -328,11 +327,11 @@ void Print_And_Exit(void)
         Total updates sent
     */
     printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", num_clients_to_emulate, total_required_updates);
-    printf("Total time elapsed: %.2f seconds\n", time_elapsed);
-    printf("Total stalled sends: %u\n", send_stalls);
-    printf("Expected throughput: %.2f updates/sec\n", expected_throughput);
-    printf("Actual throughput: %.2f updates/sec\n", actual_throughput);
-    printf("Min/Max/Avg Latency (ms): %.3f / %.3f / %.3f \n\n", min,max,avg);
+    printf("Total time elapsed:\t\t %.2f seconds\n", time_elapsed);
+    printf("Total stalled sends:\t\t %u\n", send_stalls);
+    printf("Expected throughput:\t\t %.2f updates/sec\n", expected_throughput);
+    printf("Actual throughput:\t\t %.2f updates/sec\n", actual_throughput);
+    printf("Min/Max/Avg Latency (ms):\t\t %.3f / %.3f / %.3f \n\n", min,max,avg);
     exit(1);
 
 }
