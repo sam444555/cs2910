@@ -17,6 +17,7 @@ with open(results_file, "w") as f:
 num_replicas=6
 # limit (in Mbps) where "inf" = no limit applied
 for limit in ['inf',100,250,500,750]:
+    print(f'\nusing limit {limit}')
     # apply the limit to all 6 replicas
     for replica_id in range(1,num_replicas+1):
         if limit!='inf':
@@ -33,8 +34,10 @@ for limit in ['inf',100,250,500,750]:
             )
     # test the following number of clients
     for num_emulated_clients in [10,15,20,25,30,50,100,200]:
+        print(f'using {num_emulated_clients} clients')
         # 3 trials per client
         for trial_num in range(1,4):
+            print(f'trial number {trial_num}')
             results = subprocess.run(
             f'docker exec prime1 /root/cs2910/prime/bin/driver -l 172.20.0.2 -i 1 -s 1 -c {total_updates} -n {num_emulated_clients}',shell=True,
             capture_output=True,
