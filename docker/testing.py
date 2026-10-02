@@ -49,6 +49,9 @@
 #             text=True 
 #             )
 
+#             time.sleep(5)
+
+
 #             # get the stdout from the driver program and find and parse the line with the results of the trial
 #             result_line = None
 #             for line in results.stdout.splitlines():
