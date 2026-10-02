@@ -388,7 +388,7 @@ void Send_Update(int dummy, void *dummyp)
   signed_message *update;
   int ret;
 
-  printf("SEND_UPDATE: seq=%u outstanding=%u\n",
+  printf("\nEntering SEND_UPDATE: seq=%u outstanding=%u\n",
        curr_seq_num, num_outstanding_updates);
 fflush(stdout);
 
@@ -481,6 +481,11 @@ fflush(stdout);
   {
     // E_detach_fd(sd[My_Server_ID], WRITE_FD);
   }
+
+  
+puts("Leaving Send_Update\n");
+fflush(stdout);
+
 
 }
 
