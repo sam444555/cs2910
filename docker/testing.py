@@ -36,8 +36,7 @@ for limit in ['inf',100,200,300,400,500,600,700,800,900,1000]:
         # 5 trials per client
         for trial_num in range(1,6):
             results = subprocess.run(
-            f'./driver -l 172.20.0.2 -i 1 -s 1 -c {total_updates} -n {num_emulated_clients}',
-            shell=True,
+            f'docker exec prime1 /root/cs2910/prime/bin/driver -l 172.20.0.2 -i 1 -s 1 -c {total_updates} -n {num_emulated_clients}',shell=True,
             capture_output=True,
             text=True 
             )
