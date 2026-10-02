@@ -257,15 +257,29 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   // if(response_specific->seq_num % PRINT_INTERVAL == 0)
   //   Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
   //                   time, response_specific->PO_time);
-  if(response_specific->seq_num % PRINT_INTERVAL == 0)
-  {
-      sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
-      double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
+  // if(response_specific->seq_num % PRINT_INTERVAL == 0)
+  // {
+  //     sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
+  //     double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-      printf("Updates Processed=%d\tExecution Time=%f sec\n",
-            response_specific->seq_num, elapsed_sec);
-      fflush(stdout);
-  }
+  //     printf("Updates Processed=%d\tExecution Time=%f sec\n",
+  //           response_specific->seq_num, elapsed_sec);
+  //     fflush(stdout);
+  // }
+
+  
+    sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
+    double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
+
+    printf("RESPONSE: seq=%u | curr_seq=%u | outstanding=%u | "
+           "time=%.6f sec\n",
+           response_specific->seq_num,
+           curr_seq_num,
+           num_outstanding_updates,
+           elapsed_sec);
+
+    fflush(stdout);
+
   
   num_outstanding_updates--;
   
@@ -435,6 +449,10 @@ void Send_Update(int dummy, void *dummyp)
         rollback_outstanding = num_outstanding_updates;
       }
 
+      /*
+        Used for debugging -- if for any other reason the send stalls
+        report and terminate
+      */
       if(ret == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
       {
           printf("UNEXPECTED SEND FAILURE: seq=%u errno=%d (%s)\n",
