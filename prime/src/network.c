@@ -814,6 +814,7 @@ void Net_Srv_Recv(channel sk, int source, void *dummy_p)
     {
       printf("%u total packets have been received\n",total_packets);
     }
+    if(total_packets==20000)total_packets=0;
     // received_bytes = sizeof(signed_update_message);
     received_bytes=ret;
   }
