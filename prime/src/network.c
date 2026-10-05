@@ -69,6 +69,9 @@
 #include "spines_lib.h"
 #endif
 
+/*Testing Variable*/
+u_int32_t total_packets=0;
+
 /* Global variables defined elsewhere */
 extern network_variables   NET;
 extern server_variables    VAR;
@@ -794,15 +797,19 @@ void Net_Srv_Recv(channel sk, int source, void *dummy_p)
     received_bytes = sizeof(signed_message)+mess->len;
   }
 #if USE_IPC_CLIENT
-  else if (source == IPC_SOURCE) { 
+  else if (source == IPC_SOURCE) 
+  { 
     ret = IPC_Recv(sk, srv_recv_scat.elements[0].buf,
                 //sizeof(signed_update_message));
                 PRIME_MAX_PACKET_SIZE);
     Alarm(DEBUG,"MS2022: received on IPC_SOURCE size=%d\n",ret); 
-    if (ret <= 0) {
+    
+    if (ret <= 0) 
+    {
         perror("Read from IPC Source bad, dropping packet");
         return;
     }
+    printf("%u total packets have been received\n",total_packets);
     // received_bytes = sizeof(signed_update_message);
     received_bytes=ret;
   }

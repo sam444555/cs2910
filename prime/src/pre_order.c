@@ -253,11 +253,11 @@ void PRE_ORDER_Send_PO_Request()
         E_detach_fd(NET.from_client_sd, READ_FD);
         Alarm(DEBUG, "Detaching client fd\n");
 
-            Alarm(PRINT,
-          "DETACH: po_seq=%u | executed=%u | diff=%u\n",
-          DATA.PO.po_seq.seq_num,
-          DATA.PO.po_seq_executed.seq_num,
-          DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num);
+          //   Alarm(PRINT,
+          // "DETACH: po_seq=%u | executed=%u | diff=%u\n",
+          // DATA.PO.po_seq.seq_num,
+          // DATA.PO.po_seq_executed.seq_num,
+          // DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num);
         break;
     }
 

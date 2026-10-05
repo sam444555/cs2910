@@ -452,7 +452,7 @@ void Send_Update(int dummy, void *dummyp)
 
       /*
         Used for debugging -- if for any other reason the send stalls
-        report and terminate
+        report and terminate delete me
       */
       if(ret == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
       {
