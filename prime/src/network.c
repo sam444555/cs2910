@@ -810,7 +810,10 @@ void Net_Srv_Recv(channel sk, int source, void *dummy_p)
         return;
     }
     total_packets++;
-    printf("%u total packets have been received\n",total_packets);
+    if(total_packets%100==0)
+    {
+      printf("%u total packets have been received\n",total_packets);
+    }
     // received_bytes = sizeof(signed_update_message);
     received_bytes=ret;
   }
