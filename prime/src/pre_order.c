@@ -181,6 +181,10 @@ void PRE_ORDER_Process_Update(signed_message *update)
 
   //ps.incarnation = update->incarnation;
   //ps.seq_num = up_specific->seq_num;
+  if(up_specific->seq_num>=19990)
+  {
+    printf("PRE_ORDER_Process_Update w/ seqno %u\n",up_specific->seq_num);
+  }
  
   if (update->machine_id == VAR.My_Server_ID && payload->type == CLIENT_STATE_TRANSFER
         && update->incarnation == 0 && up_specific->seq_num == 0) 

@@ -225,7 +225,7 @@ int main(int argc, char** argv)
 
   Run_Client();
 
-  Alarm(PRINT, "%d entering event system.\n", My_Client_ID);
+  Alarm(PRINT, "%d entering event system.\n\n", My_Client_ID);
   fflush(stdout);
   E_handle_events();
 
@@ -269,7 +269,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-      printf("Highest SeqNo Processed=%u Total Updates Processed=%d\tExecution Time=%f sec\n",
+      printf("Highest SeqNo Processed=%u Total Updates Processed=%d Execution Time=%f sec\n",
             highest_seq_num,response_specific->seq_num, elapsed_sec);
       fflush(stdout);
   }
