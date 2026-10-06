@@ -64,6 +64,8 @@ extern network_variables   NET;
 extern server_data_struct  DATA;
 extern benchmark_struct    BENCH;
 
+uint32_t highest_seqno=0;
+
 /* Local Functions */
 void   PRE_ORDER_Create_TAT_Entry(void);
 
@@ -173,6 +175,11 @@ void PRE_ORDER_Process_Update(signed_message *update)
   up_specific = (update_message*)(update+1);
   payload = (signed_message *)(up_specific + 1);
 
+  if(up_specific->seq_num>highest_seqno)
+  {
+    highest_seqno=up_specific->seq_num;
+  }
+
   Alarm(DEBUG, "PO_Process_Update: [%d,%d,%d]\n", up_specific->server_id, 
                     update->incarnation, up_specific->seq_num);
 
@@ -246,12 +253,17 @@ void PRE_ORDER_Send_PO_Request()
 	       PO_REQUEST_PERIOD))
       return;
   }
-  while(!UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll)) {
+  while(!UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll)) 
+  {
 
     /* Check if we reached the MAX number PO requests in flight, and if so
      * stop reading in new client requests */
     if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num >= MAX_PO_IN_FLIGHT) 
     {
+      if(highest_seqno>19990)
+      {
+        printf("Highest seqno is %u\n",highest_seqno);
+      }
         E_detach_fd(NET.from_client_sd, READ_FD);
         Alarm(DEBUG, "Detaching client fd\n");
 
@@ -292,6 +304,7 @@ void PRE_ORDER_Send_PO_Request()
         po_request->machine_id, 
         ((po_request_message *)(po_request + 1))->seq.incarnation,
         ((po_request_message *)(po_request + 1))->seq.seq_num);
+
     SIG_Add_To_Pending_Messages(po_request, dest_bits, 
 				UTIL_Get_Timeliness(PO_REQUEST));
     dec_ref_cnt(po_request);

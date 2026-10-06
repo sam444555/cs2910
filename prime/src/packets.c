@@ -79,6 +79,7 @@ signed_message* PRE_ORDER_Construct_PO_Request()
     if ((mess = UTIL_DLL_Front_Message(&DATA.PO.po_request_dll)) == NULL)
         return NULL;
     up = (update_message *)(mess + 1);
+
     if (mess->machine_id != VAR.My_Server_ID || up->seq_num != 1)
         return NULL;
     special_first = 1;
@@ -145,8 +146,9 @@ signed_message* PRE_ORDER_Construct_PO_Request()
 
       up = (update_message *)(mess + 1);
 
-        if (up->seq_num == 20000)
+    if (up->seq_num == 20000)
             Alarm(PRINT, "FOUND UPDATE 20000\n");
+    if(up->seq_num>)
 
 
       UTIL_DLL_Pop_Front(&DATA.PO.po_request_dll);
