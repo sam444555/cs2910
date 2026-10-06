@@ -227,10 +227,7 @@ void PRE_ORDER_Process_Update(signed_message *update)
   if(!SEND_PO_REQUESTS_PERIODICALLY)
     PRE_ORDER_Send_PO_Request();
   
-   if(up_specific->seq_num>=19990)
-  {
-    printf("PRE_ORDER_Process_Update w/ seqno %u\n",up_specific->seq_num);
-  }  
+
 }
 
 void PRE_ORDER_Send_PO_Request()
@@ -249,7 +246,7 @@ void PRE_ORDER_Send_PO_Request()
 	       PO_REQUEST_PERIOD))
       return;
   }
-
+  puts("this is a test!");
   while(!UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll)) {
 
     /* Check if we reached the MAX number PO requests in flight, and if so
