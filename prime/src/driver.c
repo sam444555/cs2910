@@ -108,7 +108,6 @@ double Compute_Average_Latency(void);
 void clean_exit(int signum);
 signed_message* Build_Update(void);
 void Print_And_Exit(void);
-void Print_Progress(void);
 
 /* Client Variables */
 extern network_variables NET;
@@ -224,9 +223,6 @@ int main(int argc, char** argv)
   signal(SIGTTIN, clean_exit);
   signal(SIGPIPE, clean_exit);
 
-  sp_time t = {5, 0};
-  E_queue(Print_Progress, 0, NULL, t);
-
   Run_Client();
 
   Alarm(PRINT, "%d entering event system.\n", My_Client_ID);
@@ -268,13 +264,13 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   {
     highest_seq_num=response_specific->seq_num;
   }
-  if(response_specific->seq_num % PRINT_INTERVAL == 0)
+  if(response_specific->seq_num % PRINT_INTERVAL == 0 || response_specific->seq_num>=19990)
   {
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
 
-      printf("Updates Processed=%d\tExecution Time=%f sec\n",
-            response_specific->seq_num, elapsed_sec);
+      printf("Highest SeqNo Processed=%u Total Updates Processed=%d\tExecution Time=%f sec\n",
+            highest_seq_num,response_specific->seq_num, elapsed_sec);
       fflush(stdout);
   }
 
@@ -376,12 +372,6 @@ void Print_And_Exit(void)
 
 }
 
-void Print_Progress()
-{
-  printf("Highest Sequence Number Received:%u\n",highest_seq_num);
-  sp_time t = {5, 0};
-  E_queue(Print_Progress, 0, NULL, t);
-}
 
 
 
