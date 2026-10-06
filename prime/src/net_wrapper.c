@@ -163,11 +163,7 @@ int IPC_Send(int s, void *d_buf, int nBytes, char *dst)
     ret = sendto(s, d_buf, nBytes, 0,
                     (struct sockaddr *)&conn, sizeof(struct sockaddr_un));
 
-    signed_message *mess = (signed_message *)d_buf;
-client_response_message *response =
-    (client_response_message *)(mess + 1);
-
-printf("IPC_Send: seq_num = %u\n", response->seq_num);
+    
     if (ret < 0) {
         //perror("IPC_Send: error in sendto on socket");
         puts("IPC_Send: error in sendto on socket");
