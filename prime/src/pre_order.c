@@ -65,6 +65,7 @@ extern server_data_struct  DATA;
 extern benchmark_struct    BENCH;
 
 uint32_t highest_seqno=0;
+uint32_t highest_sent = 0;
 
 /* Local Functions */
 void   PRE_ORDER_Create_TAT_Entry(void);

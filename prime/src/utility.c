@@ -1471,14 +1471,16 @@ void UTIL_Write_Client_Response(signed_message *mess)
     {
       puts("\n\nResponse to SeqNo [1] has been sent to the driver");
     }
-    if(response->seq_num==20000 && ret>0)
+    if(response->seq_num>=19995 && response->seq_num<20000 && ret>0)
     {
-      puts("Response to SeqNo [20k] has been sent to the driver\n\n");
+      printf("Response to SeqNo %u has been sent to the driver\n",response->seq_num);
     }
-    if(response->seq_num==20000 && ret<=0)
+    if(response->seq_num==20000)
     {
-      puts("Issue sending sequence number 20k to client");
+      puts("Response 20k has sent to driver\n\n");
     }
+
+
     
 
 
