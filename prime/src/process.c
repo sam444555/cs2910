@@ -76,6 +76,7 @@ void PROCESS_Message(signed_message *mess)
   switch (mess->type) {   
 
   case UPDATE:
+    
     PRE_ORDER_Process_Update(mess);
     break;
 

@@ -246,7 +246,6 @@ void PRE_ORDER_Send_PO_Request()
 	       PO_REQUEST_PERIOD))
       return;
   }
-  puts("this is a test!");
   while(!UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll)) {
 
     /* Check if we reached the MAX number PO requests in flight, and if so
