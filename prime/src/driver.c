@@ -108,6 +108,7 @@ double Compute_Average_Latency(void);
 void clean_exit(int signum);
 signed_message* Build_Update(void);
 void Print_And_Exit(void);
+void Print_Progress(void);
 
 /* Client Variables */
 extern network_variables NET;
@@ -122,6 +123,7 @@ int32u update_count;
 int32u total_required_updates;
 double total_time;
 int32u curr_seq_num;
+int32u highest_seq_num=0; // highest sequence number confirmed processed by the server
 int ca_driver;
 struct ip_mreq mreq;
 sp_time t;
@@ -175,6 +177,9 @@ int main(int argc, char** argv)
 {
 
   /* char buf[128]; */
+
+  sp_time t = {5, 0};
+  E_queue(Print_Progress, 0, NULL, t);
 
   Usage(argc, argv);
   Alarm_set_types(PRINT);
@@ -257,6 +262,10 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   // if(response_specific->seq_num % PRINT_INTERVAL == 0)
   //   Alarm(PRINT, "%d\ttotal=%f\tPO=%f\n", response_specific->seq_num, 
   //                   time, response_specific->PO_time);
+  if(response_specific->seq_num > highest_seq_num)
+  {
+    highest_seq_num=response_specific->seq_num;
+  }
   if(response_specific->seq_num % PRINT_INTERVAL == 0)
   {
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
@@ -364,6 +373,14 @@ void Print_And_Exit(void)
     exit(1);
 
 }
+
+void Print_Progress()
+{
+  printf("Highest Sequence Number Received:%u\n",highest_seq_num);
+  sp_time t = {5, 0};
+  E_queue(Print_Progress, 0, NULL, t);
+}
+
 
 
 void Run_Client()
