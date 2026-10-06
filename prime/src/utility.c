@@ -1413,8 +1413,7 @@ void UTIL_Respond_To_Client(int32u machine_id, int32u incarnation,
   
   mess = ORDER_Construct_Client_Response(machine_id, incarnation, seq_num, 
                                         ord_num, event_idx, event_tot, content);
-  if(seq_num==20000)
-  {puts("seqno 20k has been sent");}
+
   /* Treated specially, no need to set dest_bits or timeliness */
   /* For Benchmarking Prime, we sign client responses. In Prime for SCADA,
    * with the clients on the same machines as the Prime replicas, we don't need
@@ -1467,6 +1466,18 @@ void UTIL_Write_Client_Response(signed_message *mess)
     util_stopwatch ipc_send_time;
     UTIL_Stopwatch_Start(&ipc_send_time);
     ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
+    
+    if(response->seq_num==20000 && ret>0)
+    {
+      puts("Sequence number 20k successfully sent to client");
+    }
+    if(response->seq_num==20000 && ret<=0)
+    {
+      puts("Issue sending sequence number 20k to client");
+    }
+    
+
+
     UTIL_Stopwatch_Stop(&ipc_send_time);
     DATA.SIG.ipc_send_agg += UTIL_Stopwatch_Elapsed(&ipc_send_time);
     //DATA.SIG.ipc_send_msg[DATA.SIG.ipc_count] = UTIL_Stopwatch_Elapsed(&ipc_send_time);
