@@ -148,7 +148,6 @@ signed_message* PRE_ORDER_Construct_PO_Request()
 
     if (up->seq_num == 20000)
             Alarm(PRINT, "FOUND UPDATE 20000\n");
-    if(up->seq_num>)
 
 
       UTIL_DLL_Pop_Front(&DATA.PO.po_request_dll);
