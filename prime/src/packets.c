@@ -143,6 +143,12 @@ signed_message* PRE_ORDER_Construct_PO_Request()
       memcpy(p, mess, this_mess_len);
       p += this_mess_len;
 
+      up = (update_message *)(mess + 1);
+
+        if (up->seq_num == 20000)
+            Alarm(PRINT, "FOUND UPDATE 20000\n");
+
+
       UTIL_DLL_Pop_Front(&DATA.PO.po_request_dll);
 
       if (special_first) {
