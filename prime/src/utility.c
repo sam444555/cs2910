@@ -1466,10 +1466,14 @@ void UTIL_Write_Client_Response(signed_message *mess)
     util_stopwatch ipc_send_time;
     UTIL_Stopwatch_Start(&ipc_send_time);
     ret = IPC_Send(NET.to_client_sd, mess, size, NET.client_addr.sun_path);
-    
+
+    if(response->seq_num==1 && ret>0)
+    {
+      puts("\n\nResponse to SeqNo [1] has been sent to the driver");
+    }
     if(response->seq_num==20000 && ret>0)
     {
-      puts("Sequence number 20k successfully sent to client");
+      puts("Response to SeqNo [20k] has been sent to the driver\n\n");
     }
     if(response->seq_num==20000 && ret<=0)
     {
