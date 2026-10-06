@@ -178,8 +178,7 @@ int main(int argc, char** argv)
 
   /* char buf[128]; */
 
-  sp_time t = {5, 0};
-  E_queue(Print_Progress, 0, NULL, t);
+
 
   Usage(argc, argv);
   Alarm_set_types(PRINT);
@@ -225,6 +224,9 @@ int main(int argc, char** argv)
   signal(SIGTTIN, clean_exit);
   signal(SIGPIPE, clean_exit);
 
+  sp_time t = {5, 0};
+  E_queue(Print_Progress, 0, NULL, t);
+
   Run_Client();
 
   Alarm(PRINT, "%d entering event system.\n", My_Client_ID);
@@ -233,7 +235,7 @@ int main(int argc, char** argv)
 
   Alarm(PRINT, "%d finishing!!!\n", My_Client_ID);
   fflush(stdout);
-
+  
   return 0;
 }
 
