@@ -1619,6 +1619,8 @@ void CATCH_Jump_Ahead(signed_message *mess)
     if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num < MAX_PO_IN_FLIGHT) {
 #if USE_IPC_CLIENT
         E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, IPC_SOURCE, NULL, MEDIUM_PRIORITY);
+        puts("Reattaching client socket descriptor in catchup.c");
+
 #else          
         E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, TCP_SOURCE, NULL, MEDIUM_PRIORITY);
 #endif

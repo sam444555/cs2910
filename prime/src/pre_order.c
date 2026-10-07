@@ -266,6 +266,7 @@ void PRE_ORDER_Send_PO_Request()
         printf("Highest seqno is %u\n",highest_seqno);
       }
         E_detach_fd(NET.from_client_sd, READ_FD);
+          puts("Detaching client socket descriptor in preorder.c");
         Alarm(DEBUG, "Detaching client fd\n");
 
           //   Alarm(PRINT,

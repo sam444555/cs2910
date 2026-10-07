@@ -1685,7 +1685,8 @@ void ORDER_Execute_Commit(ord_slot *o_slot)
         assert(j == DATA.PO.po_seq_executed + 1); */
         if (DATA.PO.po_seq.incarnation != DATA.PO.po_seq_executed.incarnation)
             Alarm(PRINT, "PO_seq.incarnation (%u) != PO_seq_executed.incarnation (%u)\n");
-        if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num == MAX_PO_IN_FLIGHT) {
+        if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num == MAX_PO_IN_FLIGHT) 
+        {
           Alarm(DEBUG, "Execute: Reattaching client sd\n");
 #if USE_IPC_CLIENT
 
@@ -1695,6 +1696,8 @@ void ORDER_Execute_Commit(ord_slot *o_slot)
 //       DATA.PO.po_seq_executed.seq_num,
 //       DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num);
           E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, IPC_SOURCE, NULL, MEDIUM_PRIORITY);
+          puts("Reattaching client socket descriptor in order.c");
+
 #else
           E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, TCP_SOURCE, NULL, MEDIUM_PRIORITY);
 #endif
@@ -2229,6 +2232,7 @@ void ORDER_Cleanup()
   } */
   close(NET.from_client_sd);
   E_detach_fd(NET.from_client_sd, READ_FD);
+  puts("Detaching client socket descriptor in ORDER_Cleanup");
   NET.from_client_sd = 0;
   Alarm(PRINT,"&&&&&&&MS2022: order.c 2201 clsing fron_client_sd\n");
 #if USE_IPC_CLIENT
