@@ -64,8 +64,9 @@ extern network_variables   NET;
 extern server_data_struct  DATA;
 extern benchmark_struct    BENCH;
 
-uint32_t highest_seqno=0;
-uint32_t highest_sent = 0;
+
+uint32_t highest_sequence_number = 0;
+
 
 /* Local Functions */
 void   PRE_ORDER_Create_TAT_Entry(void);
@@ -176,11 +177,6 @@ void PRE_ORDER_Process_Update(signed_message *update)
   up_specific = (update_message*)(update+1);
   payload = (signed_message *)(up_specific + 1);
 
-  if(up_specific->seq_num>highest_seqno)
-  {
-    highest_seqno=up_specific->seq_num;
-  }
-
   Alarm(DEBUG, "PO_Process_Update: [%d,%d,%d]\n", up_specific->server_id, 
                     update->incarnation, up_specific->seq_num);
 
@@ -189,7 +185,8 @@ void PRE_ORDER_Process_Update(signed_message *update)
 
   //ps.incarnation = update->incarnation;
   //ps.seq_num = up_specific->seq_num;
- 
+
+  highest_sequence_number=up_specific->seq_num;
  
   if (update->machine_id == VAR.My_Server_ID && payload->type == CLIENT_STATE_TRANSFER
         && update->incarnation == 0 && up_specific->seq_num == 0) 
@@ -261,19 +258,12 @@ void PRE_ORDER_Send_PO_Request()
      * stop reading in new client requests */
     if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num >= MAX_PO_IN_FLIGHT) 
     {
-      if(highest_seqno>19990)
-      {
-        printf("Highest seqno is %u\n",highest_seqno);
-      }
         E_detach_fd(NET.from_client_sd, READ_FD);
-          puts("Detaching client socket descriptor in preorder.c");
+        
+        printf("Detaching client socket descriptor in preorder.c, highest unsent seqno is %u\n", highest_sequence_number);
+        
         Alarm(DEBUG, "Detaching client fd\n");
 
-          //   Alarm(PRINT,
-          // "DETACH: po_seq=%u | executed=%u | diff=%u\n",
-          // DATA.PO.po_seq.seq_num,
-          // DATA.PO.po_seq_executed.seq_num,
-          // DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num);
         break;
     }
 
