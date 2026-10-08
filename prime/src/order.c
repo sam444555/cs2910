@@ -1685,25 +1685,36 @@ void ORDER_Execute_Commit(ord_slot *o_slot)
         assert(j == DATA.PO.po_seq_executed + 1); */
         if (DATA.PO.po_seq.incarnation != DATA.PO.po_seq_executed.incarnation)
             Alarm(PRINT, "PO_seq.incarnation (%u) != PO_seq_executed.incarnation (%u)\n");
-        if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num == MAX_PO_IN_FLIGHT) 
+        
+        /* 
+          Checks if MAX_PO_IN_FLIGHT has been previously reached
+
+          DATA.PO.po_seq.seq_num : highest PO sequence number assigned (has entered the PO process) so far by replica i. 
+          DATA.PO.po_seq_executed.seq_num: highest PO sequence number executed so far by replica i.  
+        */
+        int max_po_reached = (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num ) == (MAX_PO_IN_FLIGHT);
+
+        // re-attach client socket if threshold has been reached
+        if (max_po_reached) 
         {
-          Alarm(DEBUG, "Execute: Reattaching client sd\n");
-#if USE_IPC_CLIENT
-
-// Alarm(PRINT,
-//       "REATTACH: po_seq=%u executed=%u diff=%u\n",
-//       DATA.PO.po_seq.seq_num,
-//       DATA.PO.po_seq_executed.seq_num,
-//       DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num);
-          E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, IPC_SOURCE, NULL, MEDIUM_PRIORITY);
-          puts("Reattaching client socket descriptor in order.c");
-
-#else
-          E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, TCP_SOURCE, NULL, MEDIUM_PRIORITY);
-#endif
+          #if USE_IPC_CLIENT
+                    E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, IPC_SOURCE, NULL, MEDIUM_PRIORITY);
+          #else
+                    E_attach_fd(NET.from_client_sd, READ_FD, Net_Srv_Recv, TCP_SOURCE, NULL, MEDIUM_PRIORITY);
+          #endif
         }
 
+        /* Update Most recent po_request executed by this replica */
         DATA.PO.po_seq_executed = ps;
+        /* 
+          Fix Bug: Handle all pending client updates awaiting inclusion in a PO request 
+          in the list DATA.PO.po_request_dll should they exist
+        */
+        if(!UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll))
+        {
+          PRE_ORDER_Send_PO_Request();
+        }
+
       }
 
       /* Check if we are about to execute the first "special" update from a RECOVERING
