@@ -1710,10 +1710,10 @@ void ORDER_Execute_Commit(ord_slot *o_slot)
           Fix Bug: Handle all pending client updates awaiting inclusion in a PO request 
           in the list DATA.PO.po_request_dll should they exist (when periodic sending disabled)
         */
-        if(max_po_reached && !UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll) && !SEND_PO_REQUESTS_PERIODICALLY)
-        {
-          PRE_ORDER_Send_PO_Request();
-        }
+        // if(max_po_reached && !UTIL_DLL_Is_Empty(&DATA.PO.po_request_dll) && !SEND_PO_REQUESTS_PERIODICALLY)
+        // {
+        //   PRE_ORDER_Send_PO_Request();
+        // }
 
       }
 
