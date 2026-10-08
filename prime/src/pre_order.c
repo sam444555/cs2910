@@ -264,11 +264,7 @@ void PRE_ORDER_Send_PO_Request()
     if (DATA.PO.po_seq.seq_num - DATA.PO.po_seq_executed.seq_num >= MAX_PO_IN_FLIGHT) 
     {
         E_detach_fd(NET.from_client_sd, READ_FD);
-        
-        printf("Detaching client socket descriptor in preorder.c, highest unsent seqno is %u\n", highest_sequence_number);
-        
         Alarm(DEBUG, "Detaching client fd\n");
-
         break;
     }
 
