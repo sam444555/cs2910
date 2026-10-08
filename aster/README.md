@@ -1,5 +1,8 @@
 # Aster Setup Guide
 
+### This guide was written during the Fall 2026 semester. Some information may be outdated and should be double-checked if any issues are encountered.
+
+
 ## Aster Server Network Configuration [As of 10/8/2026]
 
 | Server | Pitt Network | Local Network 1 | Local Network 2 |
