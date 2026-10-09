@@ -93,6 +93,8 @@ def main():
         startup()
     else:
         setup_spines()
+        print("spines setup!")
+        time.sleep(500000)
         setup_prime()
 
 if __name__ == "__main__":
