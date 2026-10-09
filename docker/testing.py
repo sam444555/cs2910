@@ -35,15 +35,17 @@ for limit in bandwidth_limit:
                 check=True
             )
     # test the following number of clients
-    for num_emulated_clients in [1,5,10,15,20,25,30,50,100]:
+    for num_emulated_clients in [100,50,30,25,20,15,10,5,1]:
         # 3 trials per client
         for trial_num in range(1,6):
+            print(f'Running trial {trial_num}, Link Speed unlimited, Num Emulated {num_emulated_clients}')
+
             results = subprocess.run(
             f'docker exec prime1 /root/cs2910/prime/bin/driver -l 172.20.0.2 -i 1 -s 1 -c {total_updates} -n {num_emulated_clients} -LS {0} -trialnum {trial_num}',shell=True,
             capture_output=True,
             text=True 
             )
-
+            print("test concluded")
             time.sleep(5)
 
             # get the stdout from the driver program and find and parse the line with the results of the trial
@@ -51,3 +53,4 @@ for limit in bandwidth_limit:
 
             with open(results_file, "a") as f:
                 f.write(results.stdout)
+    print('finished')
