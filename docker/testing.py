@@ -13,6 +13,8 @@ total_updates=25000
 num_replicas=6
 # bandwidth limit (default: none, 100/250/500/750 Mbps)
 bandwidth_limit =  ['inf',100,250,500,750]
+bandwidth_limit =  ['inf']
+
 
 # create the results file in csv format
 # limit,clients,trial#,time_sec,stalls,expected_throughput,actual_throughput,min_latency,max_latency,avg_latency
@@ -23,8 +25,6 @@ while os.path.exists(results_file):
     file_num+=1
     results_file=f'test_results/results{file_num}.csv'
 
-with open(results_file, "w") as f:
-    f.write("limit,clients,trial,time_sec,stalls,expected_throughput,actual_throughput,min_latency,max_latency,avg_latency\n")
 
 # limit (in Mbps) where "inf" = no limit applied
 for limit in bandwidth_limit:
@@ -43,25 +43,19 @@ for limit in bandwidth_limit:
                 check=True
             )
     # test the following number of clients
-    for num_emulated_clients in [10,15,20,25,30,50,100]:
+    for num_emulated_clients in [1,5,10,15,20,25,30,50,100]:
         # 3 trials per client
-        for trial_num in range(1,4):
+        for trial_num in range(1,6):
             results = subprocess.run(
-            f'docker exec prime1 /root/cs2910/prime/bin/driver -l 172.20.0.2 -i 1 -s 1 -c {total_updates} -n {num_emulated_clients}',shell=True,
+            f'docker exec prime1 /root/cs2910/prime/bin/driver -l 172.20.0.2 -i 1 -s 1 -c {total_updates} -n {num_emulated_clients} -LS {0} -trialnum {trial_num}',shell=True,
             capture_output=True,
             text=True 
             )
 
             time.sleep(5)
 
-
             # get the stdout from the driver program and find and parse the line with the results of the trial
-            result_line = None
-            for line in results.stdout.splitlines():
-                if line.startswith("RESULT,"):
-                    result_line = line
-                    break
-            data = result_line.split(',')
-            with open(results_file, "a") as f:
-                f.write(f"{limit},{num_emulated_clients},{trial_num},{','.join(data[3:])}\n")
+            print(results.stdout, flush=True)
 
+            with open(results_file, "a") as f:
+                f.write(results.stdout)
