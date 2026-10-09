@@ -2,18 +2,17 @@ import sys, subprocess, time, os, socket
 
 def kill_all(sessions):
     for i, process in sessions.items():
+        # Kill Prime, Spines, and startup script on remote machine
         subprocess.run(
-            ["ssh", f"sjl79@aster{i}.cs.pitt.edu",
-             "pkill -x prime; pkill -x spines"],
+            [
+                "ssh",
+                f"sjl79@aster{i}.cs.pitt.edu",
+                "pkill -x prime; pkill -x spines; pkill -f '[s]tartup_replica.py'"
+            ],
             check=False
         )
 
-        subprocess.run(
-            ["ssh", f"sjl79@aster{i}.cs.pitt.edu",
-             "pkill -f '[s]tartup_replica.py'"],
-            check=False
-        )
-
+        # Close local terminal window
         subprocess.run(
             ["taskkill", "/F", "/T", "/PID", str(process.pid)],
             stdout=subprocess.DEVNULL,
@@ -22,7 +21,7 @@ def kill_all(sessions):
 
     sessions.clear()
 
-    
+
 def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = [0,100,250,500,750]
