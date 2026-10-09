@@ -105,13 +105,13 @@ def main():
         text=True)
 
     # update repo and only remake/setup in the event of an update
-    git_pull_msg = sys.argv[2]
-    if "Already up to date." not in git_pull_msg:
-        setup_spines(machine_id)
-        setup_prime(machine_id)
-    else:
-        replica_id = sys.argv[1]
-        startup(machine_id,replica_id)
+    # git_pull_msg = sys.argv[2]
+    # if "Already up to date." not in git_pull_msg:
+    setup_spines(machine_id)
+    setup_prime(machine_id)
+    # else:
+    replica_id = sys.argv[1]
+    startup(machine_id,replica_id)
     
 if __name__ == "__main__":
     main()        
