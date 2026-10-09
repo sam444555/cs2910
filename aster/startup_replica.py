@@ -20,28 +20,15 @@ def setup_spines(machine_id):
         print("Building Spines...", flush=True)
         subprocess.run(["make"], cwd=spines_path, check=True)
 
-        if machine_id == 13:
-            print('Generating Spines keys...', flush=True)
-            subprocess.run(
-                "chmod +x gen_keys.sh && ./gen_keys.sh",
-                cwd=spines_path + "/daemon",
-                shell=True,
-                check=True
-            )
-        else:
-            while True:
-                result = subprocess.run([
-                    "scp", "-r",
-                    "-o", "StrictHostKeyChecking=no",
-                    "-o", "UserKnownHostsFile=/dev/null",
-                    "sjl79@aster13.cs.pitt.edu:~/cs2910/prime/spines/daemon/keys/.",
-                    spines_path + "/daemon/keys/"
-                ])
-                if result.returncode==0:break
-                else:
-                    print("Waiting for Aster 13 to generate keys...")
-                    time.sleep(5)
 
+        # print('Generating Spines keys...', flush=True)
+        # subprocess.run(
+        #     "chmod +x gen_keys.sh && ./gen_keys.sh",
+        #     cwd=spines_path + "/daemon",
+        #     shell=True,
+        #     check=True
+        # )
+   
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
 
@@ -66,29 +53,14 @@ def setup_prime(machine_id):
         subprocess.run(["make","clean"], cwd=prime_path+'/src')
         subprocess.run(["make"], cwd=prime_path+'/src')
 
-        if machine_id == 13:
-            print('Generating Prime keys...', flush=True)
-            subprocess.run(
-                ["./gen_keys"],
-                cwd=prime_path + "/bin",
-                check=True
-                )
-        else:
-            while True:
-                result = subprocess.run([
-                    "scp", "-r",
-                    "-o", "StrictHostKeyChecking=no",
-                    "-o", "UserKnownHostsFile=/dev/null",
-                    "sjl79@aster13.cs.pitt.edu:~/cs2910/prime/bin/keys/.",
-                    prime_path + "/bin/keys/"
-                ])
 
-                if result.returncode == 0:
-                    break
-                else:
-                    print("Waiting for Aster 13 to generate Prime keys...")
-                    time.sleep(5)
-        
+        # print('Generating Prime keys...', flush=True)
+        # subprocess.run(
+        #     ["./gen_keys"],
+        #     cwd=prime_path + "/bin",
+        #     check=True
+        #     )
+    
 
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
