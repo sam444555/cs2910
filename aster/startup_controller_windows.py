@@ -26,7 +26,7 @@ def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = [0,100,250,500,750]
     # total updates sent from the driver program to prime
-    total_updates = 25,000
+    total_updates = 25000
     # number of clients the driver program emulates 
     num_emulated = [1,5,10,15,20,25,30,50,100]
     # number of trials
@@ -52,7 +52,7 @@ def run_tests(sessions):
                 results = None
                 print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}')
                 # driver only running on replica 13
-                subprocess.run(
+                results = subprocess.run(
                     f"ssh sjl79@aster13.cs.pitt.edu "
                     f"'cd ~/cs2910/prime/bin && "
                     f"./driver -l 192.168.53.22 -i 1 -s 1 "
@@ -62,6 +62,8 @@ def run_tests(sessions):
                     capture_output=True,
                     text=True
                 )
+                print(results.stdout, flush=True)
+
                 with open(results_file, "a") as f:
                     f.write(results.stdout)
                 print("Finished!\n")
