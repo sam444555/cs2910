@@ -32,6 +32,8 @@ def setup_spines(machine_id):
             while True:
                 result = subprocess.run([
                     "scp", "-r",
+                    "-o", "StrictHostKeyChecking=no",
+                    "-o", "UserKnownHostsFile=/dev/null",
                     "sjl79@aster13.cs.pitt.edu:~/cs2910/prime/spines/daemon/keys/.",
                     spines_path + "/daemon/keys/"
                 ])
@@ -75,6 +77,8 @@ def setup_prime(machine_id):
             while True:
                 result = subprocess.run([
                     "scp", "-r",
+                    "-o", "StrictHostKeyChecking=no",
+                    "-o", "UserKnownHostsFile=/dev/null",
                     "sjl79@aster13.cs.pitt.edu:~/cs2910/prime/bin/keys/.",
                     prime_path + "/bin/keys/"
                 ])
