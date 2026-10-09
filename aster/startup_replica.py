@@ -90,6 +90,9 @@ def main():
 
     print("spines setup!")
     setup_prime()
+    time.sleep(15000)
+    print("prime setup!")
+    time.sleep(15000)
 
 
     # if "Already up to date." in result.stdout:
