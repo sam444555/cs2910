@@ -35,7 +35,7 @@ def kill_all(sessions):
 
 def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
-    bandwidth = [100,250,500,750]
+    bandwidth = [0]
     # total updates sent from the driver program to prime
     total_updates = 25000
     # number of clients the driver program emulates 
