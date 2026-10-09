@@ -1,6 +1,10 @@
 # Aster Setup Guide
 
-### This guide was written during the Fall 2026 semester. Some information may be outdated and should be double-checked if any issues are encountered.
+### Note: This guide was written during the Fall 2026 semester. Some information may be outdated and should be double-checked if any issues are encountered.
+
+## Step 1: VPN Setup
+The GlobalProtect VPN is required access the aster cluster remotely. You can find the download located at https://software.pitt.edu
+In the GlobalProtect, enter `portal-palo.pitt.edu` in the portal address field. 
 
 
 ## Aster Server Network Configuration [As of 10/8/2026]
