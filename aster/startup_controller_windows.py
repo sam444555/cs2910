@@ -53,11 +53,13 @@ def run_tests(sessions):
                 print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}')
                 # driver only running on replica 13
                 results = subprocess.run(
-                    f"ssh sjl79@aster13.cs.pitt.edu "
-                    f"'cd ~/cs2910/prime/bin && "
-                    f"./driver -l 192.168.53.22 -i 1 -s 1 "
-                    f"-c {total_updates} -n {clients} -LS {speed} -trialnum {i}'",
-                    shell=True,
+                    [
+                        "ssh",
+                        "sjl79@aster13.cs.pitt.edu",
+                        f"cd ~/cs2910/prime/bin && "
+                        f"./driver -l 192.168.53.22 -i 1 -s 1 "
+                        f"-c {total_updates} -n {clients} -LS {speed} -trialnum {i}"
+                    ],
                     check=True,
                     capture_output=True,
                     text=True
