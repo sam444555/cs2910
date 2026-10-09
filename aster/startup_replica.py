@@ -22,9 +22,6 @@ try:
     print("Building Spines...", flush=True)
     subprocess.run(["make"], cwd=spines_path, check=True)
 
-    print("Cleaning daemon...", flush=True)
-    subprocess.run(["make", "clean"], cwd=spines_path + "/daemon", check=True)
-
     print("All commands completed successfully!", flush=True)
 
 except subprocess.CalledProcessError as e:
