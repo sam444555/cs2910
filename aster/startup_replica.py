@@ -5,4 +5,11 @@ machine_id = int(socket.gethostname().split('.')[0][5:])
 print(f'Now running on Aster {machine_id}')
 
 while True:
-    print(os.getcwd())
+    # should be in cs2910/aster - run the config to update files accordingly using config_setup.py
+    subprocess.run(
+    ["python", "config_setup.py"],
+    input="3\n1\n",
+    text=True
+    )
+    while True:
+        time.sleep(500)
