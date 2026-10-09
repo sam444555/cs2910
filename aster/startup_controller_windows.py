@@ -35,7 +35,7 @@ def kill_all(sessions):
 
 def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
-    bandwidth = [0,100,250,500,750]
+    bandwidth = [100,250,500,750]
     # total updates sent from the driver program to prime
     total_updates = 20000
     # number of clients the driver program emulates 
@@ -43,23 +43,25 @@ def run_tests(sessions):
     # number of trials
     num_trials = 3
 
-    results_file = "benchmark_results.txt"
-    with open(results_file, "w") as f:
-        f.write("Prime Benchmark Results\n\n")
-
     # clear previous terminal output b4 displaying results
     print("\033[2J\033[H", end="", flush=True)
     for speed in bandwidth:
+        results_file = f"{speed}mbps.txt"
         processes=[]
         if speed>0:
-            for i in range(13,19):
-                p=subprocess.Popen(
-                    f"ssh sjl79@aster{i}.cs.pitt.edu "
-                    f"'sudo tc qdisc replace dev eth0 root handle 1: htb default 10 && "
-                    f"sudo tc class replace dev eth0 parent 1: classid 1:10 htb rate {speed}mbit'",
-                    shell=True)
+            for i in range(13, 19):
+                p = subprocess.Popen([
+                    "ssh",
+                    f"sjl79@aster{i}.cs.pitt.edu",
+                    f"sudo tc qdisc replace dev eth0 root handle 1: htb default 10 && "
+                    f"sudo tc class replace dev eth0 parent 1: classid 1:10 htb rate {speed}mbit"
+                ])
                 processes.append(p)
-            for p in processes:p.wait()
+
+            for p in processes:
+                if p.wait() !=0:
+                    raise RuntimeError(f"Failed setting up bandwidth of {speed} Mbps")
+
         for clients in num_emulated:
             for i in range(1,num_trials+1):
                 results = None
@@ -81,7 +83,7 @@ def run_tests(sessions):
 
                 with open(results_file, "a") as f:
                     f.write(results.stdout)
-                print("Finished!\n")
+
 
 def main():
     # Kill any existing replica startup scripts
