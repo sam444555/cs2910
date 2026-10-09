@@ -82,6 +82,7 @@ def setup_config(machines,network):
 def main():
     # any arguments passed will automatically trigger default mode
     if len(sys.argv) > 1:
+        global default_mode
         default_mode=1
         res = setup_config(None,None)
         if(res):
