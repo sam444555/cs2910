@@ -89,8 +89,9 @@ def main():
     print(result.stdout, flush=True)
 
     print("spines setup!")
-    setup_prime()
+    setup_spines()
     time.sleep(15000)
+    setup_prime()
     print("prime setup!")
     time.sleep(15000)
 
