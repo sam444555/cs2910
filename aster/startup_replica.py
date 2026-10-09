@@ -76,6 +76,8 @@ def setup_prime(machine_id):
             ["cp", "-a", "../prime_keys/.", prime_path + "/bin/keys/"],
             check=True
         )
+        print("getting keys!")
+        time.sleep(15)
         # if machine_id==13:
         #     print('Generating Prime keys...', flush=True)
         #     subprocess.run(
