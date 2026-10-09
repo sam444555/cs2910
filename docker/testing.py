@@ -16,7 +16,7 @@ bandwidth_limit =  ['inf',100,250,500,750]
 bandwidth_limit =  ['inf']
 
 
-results_file = "results.txt"
+results_file = "results_use_this_one.txt"
 
 # limit (in Mbps) where "inf" = no limit applied
 for limit in bandwidth_limit:
@@ -35,7 +35,7 @@ for limit in bandwidth_limit:
                 check=True
             )
     # test the following number of clients
-    for num_emulated_clients in [100,50,30,25,20,15,10,5,1]:
+    for num_emulated_clients in [20,25,30,50,100]:
         # 3 trials per client
         for trial_num in range(1,6):
             print(f'Running trial {trial_num}, Link Speed unlimited, Num Emulated {num_emulated_clients}')
