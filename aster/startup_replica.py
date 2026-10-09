@@ -88,14 +88,15 @@ def main():
     )
     print(result.stdout, flush=True)
 
+    print("spines setup!")
+    setup_prime()
 
-    if "Already up to date." in result.stdout:
-        startup()
-    else:
-        setup_spines()
-        print("spines setup!")
-        setup_prime()
-    time.sleep(500000)
+
+    # if "Already up to date." in result.stdout:
+    #     startup()
+    # else:
+    #     setup_spines()
+    # time.sleep(500000)
 
 
 if __name__ == "__main__":
