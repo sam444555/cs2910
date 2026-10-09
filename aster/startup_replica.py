@@ -71,9 +71,9 @@ def setup_prime(machine_id):
         subprocess.run(["make"], cwd=prime_path+'/src')
 
 
-        # Copy Prime keys from home directory
+        # Copy Prime keys
         subprocess.run(
-            ["cp", "-a", os.path.expanduser("~/prime_keys/keys/."), prime_path + "/bin/keys/"],
+            ["cp", "-a", "../prime_keys/.", prime_path + "/bin/keys/"],
             check=True
         )
 
