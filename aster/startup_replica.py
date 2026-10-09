@@ -84,6 +84,10 @@ def main():
         text=True,
         check=True
     )
+
+    setup_spines()
+    exit(1)
+
     if "Already up to date." in result.stdout:
         startup()
     else:
