@@ -4,6 +4,12 @@ def kill_all(sessions):
     for i, process in sessions.items():
         subprocess.run(
             ["ssh", f"sjl79@aster{i}.cs.pitt.edu",
+             "pkill -x prime; pkill -x spines"],
+            check=False
+        )
+
+        subprocess.run(
+            ["ssh", f"sjl79@aster{i}.cs.pitt.edu",
              "pkill -f '[s]tartup_replica.py'"],
             check=False
         )
@@ -16,6 +22,7 @@ def kill_all(sessions):
 
     sessions.clear()
 
+    
 def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = [0,100,250,500,750]
