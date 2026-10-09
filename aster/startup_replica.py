@@ -24,9 +24,8 @@ try:
 
     print("All commands completed successfully!", flush=True)
 
-except subprocess.CalledProcessError as e:
-    print(f"Command failed: {e.cmd}", flush=True)
-    print(f"Exit code: {e.returncode}", flush=True)
+except Exception as e:
+    print(f"ERROR: {type(e).__name__}: {e}", flush=True)
 
 finally:
     print("Press Ctrl+C to exit.", flush=True)
