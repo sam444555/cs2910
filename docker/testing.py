@@ -16,15 +16,7 @@ bandwidth_limit =  ['inf',100,250,500,750]
 bandwidth_limit =  ['inf']
 
 
-# create the results file in csv format
-# limit,clients,trial#,time_sec,stalls,expected_throughput,actual_throughput,min_latency,max_latency,avg_latency
-file_num=0
-results_file=f'test_results/results{file_num}.csv'
-
-while os.path.exists(results_file):
-    file_num+=1
-    results_file=f'test_results/results{file_num}.csv'
-
+results_file = "results.txt"
 
 # limit (in Mbps) where "inf" = no limit applied
 for limit in bandwidth_limit:
