@@ -20,6 +20,13 @@ def setup_spines(machine_id):
         print("Building Spines...", flush=True)
         subprocess.run(["make"], cwd=spines_path, check=True)
 
+        # Copy Spines keys
+        subprocess.run(
+            ["cp", "-a", "../spines_keys/.", spines_path + "/daemon/keys/"],
+            check=True
+        )
+
+        
         # if machine_id==13:
         #     print('Generating Spines keys...', flush=True)
         #     subprocess.run(
@@ -63,6 +70,12 @@ def setup_prime(machine_id):
         subprocess.run(["make","clean"], cwd=prime_path+'/src')
         subprocess.run(["make"], cwd=prime_path+'/src')
 
+
+        # Copy Prime keys
+        subprocess.run(
+            ["cp", "-a", "../prime_keys/.", prime_path + "/bin/keys/"],
+            check=True
+        )
         # if machine_id==13:
         #     print('Generating Prime keys...', flush=True)
         #     subprocess.run(
