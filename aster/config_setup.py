@@ -1,5 +1,5 @@
 import sys, subprocess, os; from pathlib import Path
-
+default_mode = 0
 
 
 def setup_config(machines,network):
@@ -19,7 +19,7 @@ def setup_config(machines,network):
     print(f'Using Network # {network}')
     for ip in ips:
         print(f'aster {ip_list[ip]}: {ip}')
-    while True:
+    while True and default_mode==0:
         ans = input('Is this selection valid? (1 for yes 0 for no)\n')
         if(ans=='1'):break
         if(ans=='0'):return 0
@@ -80,6 +80,16 @@ def setup_config(machines,network):
 
 
 def main():
+    # any arguments passed will automatically trigger default mode
+    if len(sys.argv) > 1:
+        default_mode=1
+        res = setup_config(None,None)
+        if(res):
+            print('Configuration files have been set up successfully!\n')
+        else:
+            print('Something went wrong setting up the configuration files...\n')
+        exit(1)
+
     #ip addresses
     network = None
     # Build the configuration
@@ -123,6 +133,7 @@ def main():
             # valid machine picked, begin constructing the config info
             aster_list.append(machine_int)
         setup_config(aster_list,network)
+        print('Config files have successfully been set up!')
         return aster_list
         
 if __name__ == "__main__":
