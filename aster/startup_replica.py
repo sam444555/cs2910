@@ -17,11 +17,31 @@ spines_path = "../prime/spines"
 #     time.sleep(50)
 spines_path = "../prime/spines"
 
-subprocess.run(["./configure"], cwd=spines_path, check=True)
-subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
-subprocess.run(["make"], cwd=spines_path, check=True)
-# create keys for spines 
-subprocess.run(["make","clean"], cwd=spines_path+"/daemon", check=True)
+# subprocess.run(["./configure"], cwd=spines_path, check=True)
+# subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
+# subprocess.run(["make"], cwd=spines_path, check=True)
+# # create keys for spines 
+# subprocess.run(["make","clean"], cwd=spines_path+"/daemon", check=True)
+try:
+    subprocess.run(["./configure"], cwd=spines_path, check=True)
+finally:
+    input("Configure finished. Press Enter to continue...")
+
+try:
+    subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
+finally:
+    input("Parser finished. Press Enter to continue...")
+
+try:
+    subprocess.run(["make"], cwd=spines_path, check=True)
+finally:
+    input("Make finished. Press Enter to continue...")
+
+try:
+    subprocess.run(["make", "clean"], cwd=spines_path + "/daemon", check=True)
+finally:
+    input("Make clean finished. Press Enter to exit...")
+
 
 while True:
     print('Its all good!')
