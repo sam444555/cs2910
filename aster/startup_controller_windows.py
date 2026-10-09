@@ -26,6 +26,10 @@ def run_tests(sessions):
     # number of trials
     num_trials = 5
 
+    results_file = "benchmark_results.txt"
+    with open(results_file, "w") as f:
+        f.write("Prime Benchmark Results\n\n")
+
     for speed in bandwidth:
         processes=[]
         if speed>0:
@@ -39,6 +43,7 @@ def run_tests(sessions):
             for p in processes:p.wait()
         for clients in num_emulated:
             for i in range(1,num_trials+1):
+                results = None
                 print(f'Running trial {i}, Link Speed {speed}, Num Emulated {clients}')
                 # driver only running on replica 13
                 subprocess.run(
@@ -47,8 +52,13 @@ def run_tests(sessions):
                     f"./driver -l 192.168.53.22 -i 1 -s 1 "
                     f"-c {total_updates} -n {clients} -LS {speed} -trialnum {i}'",
                     shell=True,
-                    check=True
+                    check=True,
+                    capture_output=True,
+                    text=True
                 )
+                with open(results_file, "a") as f:
+                    f.write(results.stdout)
+                print("Finished!\n")
 
 def main():
     sessions = {}
