@@ -64,9 +64,28 @@ def setup_prime():
         print("Prime successfully setup!", flush=True)
 
 # start spines, prime, and driver (if on replica 13)
-def startup():
-    print('bye!')
+def startup(aster_id, replica_id):
+    base_ip = f'192.168.53.{aster_id+9}'
 
+    # start spines: ./spines -I <ip address> 
+    spines = subprocess.Popen(
+        f"./spines -I {base_ip}",
+        cwd='../prime/spines/daemon',
+        shell=True
+    )
+
+    print("Giving spines time to start...")
+    time.sleep(10)
+
+    # start prime: ./prime -i <server id> -g <global id>
+    subprocess.Popen(
+    f"./prime -i {replica_id} -g {replica_id}",
+    cwd='../prime/bin',
+    shell=True
+    )
+
+    # wait for spines to terminate then terminate 
+    spines.communicate()    
 
 def main():
     # get the aster id 
@@ -79,30 +98,14 @@ def main():
         text=True)
 
     # update repo and only remake/setup in the event of an update
-    result = subprocess.run(
-        ["git", "pull"],
-        cwd="..",
-        capture_output=True,
-        text=True,
-        check=True
-    )
-    print(result.stdout, flush=True)
-
-    print("spines setup!")
-    setup_spines()
-    time.sleep(15)
-    setup_prime()
-    print("prime setup!")
-    time.sleep(15)
-
-
-    # if "Already up to date." in result.stdout:
-    #     startup()
-    # else:
-    #     setup_spines()
-    # time.sleep(500000)
-
-
+    git_pull_msg = sys.argv[2]
+    if "Already up to date." not in git_pull_msg:
+        setup_spines()
+        setup_prime()
+    else:
+        replica_id = sys.argv[1]
+        startup(machine_id,replica_id)
+    
 if __name__ == "__main__":
     main()        
 

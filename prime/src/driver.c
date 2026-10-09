@@ -77,6 +77,9 @@
 
 */
 
+/* Set to 1 to limit printing for easier result parsing */
+#define TESTING_MODE 1
+
 /* Adjust this to configure how often a client prints. */
 #define PRINT_INTERVAL 1000
 
@@ -162,6 +165,9 @@ util_stopwatch throughput_sw;
 //Number of clients the driver emulates, now passed as a command-line argument using the -c flag. 
 int32u num_clients_to_emulate = 1;
 
+// input for easier testing parsing
+int32u trial_num=0;
+int32u link_speed=0;
 
 
 
@@ -249,7 +255,6 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   
   UTIL_Stopwatch_Stop(&update_sw[response_specific->seq_num]);
   time = UTIL_Stopwatch_Elapsed(&update_sw[response_specific->seq_num]);
-  // Alarm(STATUS, "Processing conf=%lu, seq=%d\ttotal=%f\tPO=%f\n",mess->global_configuration_number ,response_specific->seq_num, time,response_specific->PO_time);
 
 
   if (response_specific->PO_time < Min_PO_Time)
@@ -264,7 +269,7 @@ void Process_Message( signed_message *mess, int32u num_bytes )
   {
     highest_seq_num=response_specific->seq_num;
   }
-  if(response_specific->seq_num % PRINT_INTERVAL == 0 || response_specific->seq_num>=19990)
+  if(response_specific->seq_num % PRINT_INTERVAL == 0 && !TESTING_MODE)
   {
       sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
       double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
@@ -276,20 +281,6 @@ void Process_Message( signed_message *mess, int32u num_bytes )
 
     num_outstanding_updates--;
 
-
-    // sp_time elapsed = E_sub_time(E_get_time(), throughput_sw.start);
-    // double elapsed_sec = elapsed.sec + elapsed.usec / 1000000.0;
-
-    // printf("RESPONSE: seq=%u | curr_seq=%u | outstanding=%u | "
-    //        "time=%.6f sec\n",
-    //        response_specific->seq_num,
-    //        curr_seq_num,
-    //        num_outstanding_updates,
-    //        elapsed_sec);
-
-    // fflush(stdout);
-
-  
   
   /*
       Throughput measurement exit condition: No outstanding updates and all 
@@ -350,7 +341,8 @@ void Print_And_Exit(void)
     */
 
     // HUMAN VERSION
-    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u] ***\n", num_clients_to_emulate, total_required_updates);
+    printf("\n*** Test Results [Number of Emulated Clients: %u | Total Updates: %u | Link Speed: %u Mbps | Trial Num: %u ] ***\n", 
+      num_clients_to_emulate, total_required_updates,link_speed, trial_num);
     printf("Total time elapsed (seconds):\t\t\t %.2f\n", time_elapsed);
     printf("Total stalled sends:\t\t\t\t %u\n", send_stalls);
     printf("Expected throughput (updates/sec):\t\t %.2f\n", expected_throughput);
@@ -622,7 +614,20 @@ void Usage(int argc, char **argv)
       sscanf(argv[1], "%d", &tmp);
       num_clients_to_emulate = tmp;
       argc--; argv++;
-    } 
+    }
+    /* -LS used for outputting purposes to print the link speed of the test*/
+    else if((argc > 1) && !strcmp(*argv, "-LS")) 
+    {
+      link_speed = atoi(argv[1]);
+      argc--; argv++;
+    }
+    /* -trialnum records the trial num of the test*/
+    else if((argc > 1) && !strcmp(*argv, "-trialnum")) 
+    {
+        trial_num = atoi(argv[1]);
+        argc--; argv++;
+    }
+
 
    else {
       Print_Usage();
