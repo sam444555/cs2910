@@ -57,6 +57,8 @@ def setup_prime():
 
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
+        input("Press enter to exit")
+        sys.exit(1)
 
     finally:
         print("Prime successfully setup!", flush=True)
@@ -85,8 +87,7 @@ def main():
         check=True
     )
 
-    setup_spines()
-    exit(1)
+
 
     if "Already up to date." in result.stdout:
         startup()
