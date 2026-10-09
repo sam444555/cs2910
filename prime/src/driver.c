@@ -360,7 +360,7 @@ void Print_And_Exit(void)
     //    min,
     //    max,
     //    avg);
-    exit(1);
+    exit(0);
 
 }
 

@@ -28,7 +28,7 @@ def run_tests(sessions):
     # total updates sent from the driver program to prime
     total_updates = 25000
     # number of clients the driver program emulates 
-    num_emulated = [1,5,10,15,20,25,30,50,100]
+    num_emulated = [10,15,20,25,30,50,100]
     # number of trials
     num_trials = 5
 
