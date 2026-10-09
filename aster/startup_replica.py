@@ -8,7 +8,6 @@ while True:
     # should be in cs2910/aster - run the config to update files accordingly using config_setup.py
     subprocess.run(
     ["python", "config_setup.py","d"],
-    input="3\n1\n",
     text=True
     )
     while True:
