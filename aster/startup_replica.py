@@ -13,6 +13,13 @@ subprocess.run(
 # set up spines 
 spines_path = "../prime/spines"
 try:
+
+    subprocess.run(["chmod", "+x", "configure"], cwd=spines_path, check=True)
+    subprocess.run(["chmod", "+x", "stdutil/configure"], cwd=spines_path, check=True)
+    subprocess.run(["chmod", "-R", "+x", "stdutil/buildtools"], cwd=spines_path, check=True)
+    subprocess.run(["chmod", "+x", "libspread-util/configure"], cwd=spines_path, check=True)
+    subprocess.run(["chmod", "-R", "+x", "libspread-util/buildtools"], cwd=spines_path, check=True)
+    
     print("Configuring Spines...", flush=True)
     subprocess.run(["./configure"], cwd=spines_path, check=True)
 
