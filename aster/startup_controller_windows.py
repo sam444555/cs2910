@@ -64,7 +64,7 @@ def main():
     sessions = {}
     id =1
     for i in range(13, 19):
-        sessions[i] = subprocess.run(
+        sessions[i] = subprocess.Popen(
             f'ssh sjl79@aster{i}.cs.pitt.edu '
             f'"output=$(git -C cs2910 pull 2>&1 || git clone https://github.com/sam444555/cs2910.git 2>&1); '
             f'echo \\"$output\\"; '
