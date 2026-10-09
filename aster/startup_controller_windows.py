@@ -37,11 +37,11 @@ def run_tests(sessions):
     # link speed (Mbps) [where 0 is no limit]
     bandwidth = [100,250,500,750]
     # total updates sent from the driver program to prime
-    total_updates = 20000
+    total_updates = 25000
     # number of clients the driver program emulates 
-    num_emulated = [10,15,20,25,30,50,100]
+    num_emulated = [1,5,10,15,20,25,30,50,100]
     # number of trials
-    num_trials = 3
+    num_trials = 5
 
     # clear previous terminal output b4 displaying results
     print("\033[2J\033[H", end="", flush=True)
@@ -49,6 +49,7 @@ def run_tests(sessions):
         results_file = f"{speed}mbps.txt"
         processes=[]
         if speed > 0:
+            # can't modify link speeds on aster w/o sudo
             for i in range(13, 19):
                 print(f"Configuring Aster{i} to {speed} Mbps...", flush=True)
 
