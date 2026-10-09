@@ -11,6 +11,56 @@ In the GlobalProtect, enter `portal-palo.pitt.edu` in the portal address field.
 Use your Pitt credentials when prompted for your username and password.
 
 
+### Step 2: Connecting to an Aster Server
+
+Establish an SSH connection using your Pitt username and the desired Aster server:
+
+```bash
+ssh <Pitt-username>@asterx.cs.pitt.edu
+```
+where x is an integer in the range 1-20.
+
+
+Example:
+```bash
+ssh abc12@aster1.cs.pitt.edu
+```
+
+Use your Pitt password to login to the cluster. I initially had issues  with this and had to contact IT.
+
+### Step 3: Dependencies
+
+The Aster cluster runs AlmaLinux 9, which uses `dnf` instead of Ubuntu's `apt-get` package manager.
+
+The following dependencies are required to compile Prime and Spines:
+
+```bash
+sudo dnf install -y \
+    gcc \
+    gcc-c++ \
+    make \
+    openssl-devel \
+    flex \
+    bison \
+    byacc \
+    git \
+    groff \
+    python3 \
+    iproute \
+    iputils
+```
+
+**Note:** Most dependencies are already installed on the Aster servers. Installing additional packages requires administrator privileges.
+
+### Step 4: Clone the Git repo
+```bash
+git clone https://github.com/sam444555/cs2910.git
+```
+
+
+
+
+
 ## Aster Server Network Configuration [As of 10/8/2026]
 
 | Server | Pitt Network | Local Network 1 | Local Network 2 |
