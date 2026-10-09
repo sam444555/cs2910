@@ -12,12 +12,20 @@ subprocess.run(
 
 # set up spines 
 spines_path = "../prime/spines"
-# subprocess.run(["make","clean"], cwd=spines_path, check=True)
 try:
+    print("Configuring Spines...", flush=True)
     subprocess.run(["./configure"], cwd=spines_path, check=True)
+
+    print("Building parser...", flush=True)
     subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
+
+    print("Building Spines...", flush=True)
     subprocess.run(["make"], cwd=spines_path, check=True)
+
+    print("Cleaning daemon...", flush=True)
     subprocess.run(["make", "clean"], cwd=spines_path + "/daemon", check=True)
+
+    print("All commands completed successfully!", flush=True)
 
 except subprocess.CalledProcessError as e:
     print(f"Command failed: {e.cmd}", flush=True)
