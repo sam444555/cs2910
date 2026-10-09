@@ -20,15 +20,25 @@ def setup_spines(machine_id):
         print("Building Spines...", flush=True)
         subprocess.run(["make"], cwd=spines_path, check=True)
 
+        if machine_id==13:
+            print('Generating Spines keys...', flush=True)
+            subprocess.run(
+                "chmod +x gen_keys.sh && ./gen_keys.sh",
+                cwd=spines_path + "/daemon",
+                shell=True,
+                check=True
+            )
 
-        # print('Generating Spines keys...', flush=True)
-        # subprocess.run(
-        #     "chmod +x gen_keys.sh && ./gen_keys.sh",
-        #     cwd=spines_path + "/daemon",
-        #     shell=True,
-        #     check=True
-        # )
-   
+            # Save keys outside the cs2910 repository
+            backup_dir = os.path.expanduser("~/spines_keys")
+
+            subprocess.run(
+                ["cp", "-a", spines_path + "/daemon/keys", backup_dir],
+                check=True
+            )
+        else:
+            exit(1)
+    
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
 
@@ -53,14 +63,23 @@ def setup_prime(machine_id):
         subprocess.run(["make","clean"], cwd=prime_path+'/src')
         subprocess.run(["make"], cwd=prime_path+'/src')
 
+        if machine_id==13:
+            print('Generating Prime keys...', flush=True)
+            subprocess.run(
+                ["./gen_keys"],
+                cwd=prime_path + "/bin",
+                check=True
+                )
 
-        # print('Generating Prime keys...', flush=True)
-        # subprocess.run(
-        #     ["./gen_keys"],
-        #     cwd=prime_path + "/bin",
-        #     check=True
-        #     )
-    
+            # Save keys outside the cs2910 repository
+            backup_dir = os.path.expanduser("~/prime_keys")
+
+            subprocess.run(
+                ["cp", "-a", prime_path + "/bin/keys", backup_dir],
+                check=True
+            )
+        else:exit(1)
+        exit(1)
 
     except Exception as e:
         print(f"ERROR: {type(e).__name__}: {e}", flush=True)
