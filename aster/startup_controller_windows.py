@@ -30,7 +30,7 @@ def run_tests(sessions):
     # number of clients the driver program emulates 
     num_emulated = [10,15,20,25,30,50,100]
     # number of trials
-    num_trials = 5
+    num_trials = 3
 
     results_file = "benchmark_results.txt"
     with open(results_file, "w") as f:
