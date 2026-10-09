@@ -4,7 +4,9 @@
 
 ## Step 1: VPN Setup
 The GlobalProtect VPN is required access the aster cluster remotely. You can find the download located at https://software.pitt.edu.  
-In the GlobalProtect, enter `portal-palo.pitt.edu` in the portal address field. 
+
+
+In the GlobalProtect, enter `portal-palo.pitt.edu` in the portal address field. Use your Pitt credentials when prompted for username and password
 
 
 ## Aster Server Network Configuration [As of 10/8/2026]
