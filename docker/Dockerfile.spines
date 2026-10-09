@@ -4,6 +4,10 @@ FROM base-img
 WORKDIR /root
 RUN git clone https://github.com/sam444555/cs2910.git
 
+# update the configurations
+WORKDIR /root/cs2910/docker
+RUN python3 config_setup.py
+
 # Configure and compile spines
 WORKDIR /root/cs2910/prime/spines
 # Make the scripts used executable [Windows/Linux executable permission compatibility issue]
