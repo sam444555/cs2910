@@ -13,6 +13,8 @@ subprocess.run(
 # set up spines 
 spines_path = "../prime/spines"
 subprocess.run(["make","clean"], cwd=spines_path, check=True)
+while True:
+    time.sleep(50)
 subprocess.run(["./configure"], cwd=spines_path, check=True)
 subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
 subprocess.run(["make"], cwd=spines_path, check=True)
