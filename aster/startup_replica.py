@@ -86,7 +86,7 @@ def main():
         text=True,
         check=True
     )
-
+    print(result.stdout, flush=True)
 
 
     if "Already up to date." in result.stdout:
