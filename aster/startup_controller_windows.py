@@ -47,6 +47,8 @@ def run_tests(sessions):
     with open(results_file, "w") as f:
         f.write("Prime Benchmark Results\n\n")
 
+    # clear previous terminal output b4 displaying results
+    print("\033[2J\033[H", end="", flush=True)
     for speed in bandwidth:
         processes=[]
         if speed>0:
