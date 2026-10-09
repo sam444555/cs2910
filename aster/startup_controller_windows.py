@@ -50,18 +50,23 @@ def run_tests(sessions):
         processes=[]
         if speed > 0:
             for i in range(13, 19):
-                p = subprocess.Popen([
-                    "ssh",
-                    "-tt",  # Allow sudo to prompt for password
-                    f"sjl79@aster{i}.cs.pitt.edu",
-                    f"sudo tc qdisc replace dev eth0 root handle 1: htb default 10 && "
-                    f"sudo tc class replace dev eth0 parent 1: classid 1:10 htb rate {speed}mbit"
-                ])
-                processes.append(p)
+                print(f"Configuring Aster{i} to {speed} Mbps...", flush=True)
 
-            for p in processes:
-                if p.wait() !=0:
-                    raise RuntimeError(f"Failed setting up bandwidth of {speed} Mbps")
+                subprocess.run(
+                    [
+                        "ssh",
+                        "-tt",
+                        f"sjl79@aster{i}.cs.pitt.edu",
+                        f"sudo tc qdisc replace dev eth0 root handle 1: htb default 10 && "
+                        f"sudo tc class replace dev eth0 parent 1: classid 1:10 htb rate {speed}mbit"
+                    ],
+                    check=True
+                )
+            #     processes.append(p)
+
+            # for p in processes:
+            #     if p.wait() !=0:
+            #         raise RuntimeError(f"Failed setting up bandwidth of {speed} Mbps")
 
         for clients in num_emulated:
             for i in range(1,num_trials+1):
