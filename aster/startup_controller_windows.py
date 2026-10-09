@@ -1,6 +1,17 @@
 import sys, subprocess, time, os, socket
 
 def kill_all(sessions):
+    if sessions is None:
+        for i in range(13, 19):
+            subprocess.run(
+                [
+                    "ssh",
+                    f"sjl79@aster{i}.cs.pitt.edu",
+                    "pkill -x prime; pkill -x spines; pkill -f '[s]tartup_replica.py'"
+                ],
+                check=False
+            )        
+        return
     for i, process in sessions.items():
         # Kill Prime, Spines, and startup script on remote machine
         subprocess.run(
@@ -18,7 +29,7 @@ def kill_all(sessions):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
-
+    # //closes terminal windows
     sessions.clear()
 
 
@@ -72,12 +83,7 @@ def run_tests(sessions):
 
 def main():
     # Kill any existing replica startup scripts
-    for i in range(13, 19):
-        subprocess.run(
-            ["ssh", f"sjl79@aster{i}.cs.pitt.edu",
-            "pkill -f '[s]tartup_replica.py'"],
-            check=False
-        )
+    kill_all(None)
 
     # Start new sessions
     sessions = {}
