@@ -17,11 +17,6 @@ spines_path = "../prime/spines"
 #     time.sleep(50)
 spines_path = "../prime/spines"
 
-try:
-    subprocess.run(["make", "clean"], cwd=spines_path, check=True)
-finally:
-    input("Press Enter to exit...")
-
 subprocess.run(["./configure"], cwd=spines_path, check=True)
 subprocess.run(["make", "-C", "daemon", "parser"], cwd=spines_path, check=True)
 subprocess.run(["make"], cwd=spines_path, check=True)
@@ -29,4 +24,5 @@ subprocess.run(["make"], cwd=spines_path, check=True)
 subprocess.run(["make","clean"], cwd=spines_path+"/daemon", check=True)
 
 while True:
-    time.sleep(50)
+    print('Its all good!')
+    time.sleep(5000)
