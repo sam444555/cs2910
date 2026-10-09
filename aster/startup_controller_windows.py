@@ -61,6 +61,15 @@ def run_tests(sessions):
                 print("Finished!\n")
 
 def main():
+    # Kill any existing replica startup scripts
+    for i in range(13, 19):
+        subprocess.run(
+            ["ssh", f"sjl79@aster{i}.cs.pitt.edu",
+            "pkill -f '[s]tartup_replica.py'"],
+            check=False
+        )
+
+    # Start new sessions
     sessions = {}
     id =1
     for i in range(13, 19):
